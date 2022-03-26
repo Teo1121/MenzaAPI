@@ -1,5 +1,6 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
+import xmlrpc.client
 import json
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
@@ -60,8 +61,20 @@ class API:
         except Exception as e:
             print(e)
             return False
+        if self.__check_change():
+            with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email:
+                email.send_all()
+
         return True
 
+    def __check_change(self):
+        return not self.__backup() == self.read_menza()
+    
+    def verify_email(self, email : str) -> bool:
+        if self.__dupicate(email):
+            return False
+        with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email:
+                return email.send_verification(email)
 def main():
     # Create server
     with SimpleXMLRPCServer(('127.0.0.1', 8000),
