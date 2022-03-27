@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 import xmlrpc.client 
 
 def create_app():
@@ -16,6 +16,22 @@ def create_app():
     def get_menza():
         return {"code":200,"data":api.read_menza()}
 
+    @app.route('/email', methods=['POST'])
+    def post_email():
+        data = request.get_json()
+        try:
+            if not api.verify_email(data["email"]):
+                return ({"code":400,"message":"email already in database"},400)
+        except KeyError as e:
+            return ban_request(e)
+        return {"code":200,"message":"A verification email has been sent"}
+    
+    @app.route('/verify/<uuid>')
+    def verify_email(uuid):
+        if api.write_email(uuid):
+            return {"code":200,"message":"Thank you for subscribing"}
+        return ({"code":400,"message":"Already verified"},400)
+
     @app.route('/error')
     def error():
         raise Exception("test exception")
@@ -24,6 +40,10 @@ def create_app():
     def page_not_found(error):
         return ({"code":404, "message":"This page does not exist"},404)
     
+    @app.errorhandler(405)
+    def not_allowed(error):
+        return ({"code":405, "message":"This method is not allowed"},405)
+
     @app.errorhandler(400)
     def ban_request(error):
         return ({"code":400, "message":"Bad request"},400)

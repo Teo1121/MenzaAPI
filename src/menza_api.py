@@ -2,6 +2,7 @@ from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 import xmlrpc.client
 import json
+import uuid
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
@@ -13,6 +14,8 @@ class API:
         self.__email_file = "./resources/email.txt"
         self.__menza_file = "./resources/menza.json"
         self.__menza_backup = "./resources/yesterday.json"
+
+        self.emails2verify = {}
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
@@ -26,11 +29,22 @@ class API:
     def __dupicate(self, email : str) -> int:
         return email in self.read_email()
 
-    def write_email(self, email : str) -> bool:
+    def verify_email(self, email : str) -> bool:
         if self.__dupicate(email):
             return False
+        uid = str(uuid.uuid4())
+        self.emails2verify[uid] = email 
+        with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
+            return email_server.send_verification(email,uid)
+
+    def write_email(self, uid : str) -> bool:
+        if not uid in self.emails2verify:
+            return False
         with open(self.__email_file,'a', encoding='utf-8') as file:
-            file.write(email+'\n')
+            file.write(self.emails2verify[uid]+'\n')
+        with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
+            email_server.send_confirmation(self.emails2verify[uid])  
+        self.emails2verify.pop(uid)
         return True
     
     def delete_email(self, email : str) -> bool:
@@ -44,6 +58,8 @@ class API:
                 file.write(e+'\n')
         return True
     
+
+
     def read_menza(self) -> dict:
         with open(self.__menza_file,'r', encoding='utf8') as file:
             return json.loads(file.readline())
@@ -64,17 +80,11 @@ class API:
         if self.__check_change():
             with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email:
                 email.send_all()
-
         return True
 
     def __check_change(self):
         return not self.__backup() == self.read_menza()
     
-    def verify_email(self, email : str) -> bool:
-        if self.__dupicate(email):
-            return False
-        with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email:
-                return email.send_verification(email)
 def main():
     # Create server
     with SimpleXMLRPCServer(('127.0.0.1', 8000),

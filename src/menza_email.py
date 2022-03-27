@@ -16,15 +16,15 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 class Email:
     SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-    def __send_message(self, message):
+    def __send_message(self, message : MIMEText) -> bool:
       try:
         body = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')}
         message = (self.service.users().messages().send(userId='me', body=body)
                    .execute())
-        print('Message Id: %s' % message['id'])
-        return message
+        return True
       except HttpError as error:
         print('An error occurred: %s' % error)
+        return False
 
     def __init__(self) -> None:
         creds = None
@@ -59,29 +59,28 @@ class Email:
 
         for m in emails:
             message['to'] = m
-            self.__send_message(message)
+            if not self.__send_message(message):
+                return False
         return True
     
-    def send_verification(self,email : str) -> bool:
+    def send_verification(self, email : str, id : str) -> bool:
 
-        link = "test"
+        link = "http://127.0.0.1:8081/verify/"+id
         message = MIMEText("link :"+link)
         message['to'] = email
         message['from'] = "me"
         message['subject'] = "Verify subscription"
 
-        self.__send_message(message)
-        return True
+        return self.__send_message(message)
     
     def send_confirmation(self, email : str) -> bool:
 
-        message = MIMEText("Thank you!")
+        message = MIMEText("Thank you for subscribing!")
         message['to'] = email
         message['from'] = "me"
         message['subject'] = "Thank you!"
 
-        self.__send_message(message)
-        return True
+        return self.__send_message(message)
             
 def main():
     # Create server
