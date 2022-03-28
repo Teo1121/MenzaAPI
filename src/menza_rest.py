@@ -30,7 +30,13 @@ def create_app():
     def verify_email(uuid):
         if api.write_email(uuid):
             return {"code":200,"message":"Thank you for subscribing"}
-        return ({"code":400,"message":"Already verified"},400)
+        return ({"code":400,"message":"identifier not found"},400)
+
+    @app.route('/delete/<uuid>')
+    def delete_email(uuid):
+        if api.delete_email(uuid):
+            return {"code":200,"message":"You have been unsubscribed"}
+        return ({"code":400,"message":"identifier not found"},400)
 
     @app.route('/error')
     def error():

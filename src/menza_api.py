@@ -11,7 +11,7 @@ class API:
     __instance = None
 
     def __init__(self) -> None:
-        self.__email_file = "./resources/email.txt"
+        self.__email_file = "./resources/email.csv"
         self.__menza_file = "./resources/menza.json"
         self.__menza_backup = "./resources/yesterday.json"
 
@@ -22,17 +22,17 @@ class API:
             cls.__instance = super().__new__(cls, *args, **kwargs)
         return cls.__instance
     
-    def read_email(self) -> list[str]:
+    def read_email(self) -> dict:
         with open(self.__email_file,'r', encoding='utf-8') as file:
-            return list(set([email[:-1] for email in file.readlines()]))
+            return dict([email[:-1].split(', ') for email in file.readlines()][1:])
     
-    def __dupicate(self, email : str) -> int:
-        return email in self.read_email()
+    def __dupicate(self, email : str) -> bool:
+        return email in self.read_email().values()
 
     def verify_email(self, email : str) -> bool:
         if self.__dupicate(email):
             return False
-        uid = str(uuid.uuid4())
+        uid = str(uuid.uuid1())
         self.emails2verify[uid] = email 
         with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
             return email_server.send_verification(email,uid)
@@ -41,21 +41,22 @@ class API:
         if not uid in self.emails2verify:
             return False
         with open(self.__email_file,'a', encoding='utf-8') as file:
-            file.write(self.emails2verify[uid]+'\n')
+            file.write(uid+', '+self.emails2verify[uid]+'\n')
         with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
             email_server.send_confirmation(self.emails2verify[uid])  
         self.emails2verify.pop(uid)
         return True
     
-    def delete_email(self, email : str) -> bool:
+    def delete_email(self, uid : str) -> bool:
         emails = self.read_email()
         try:
-            emails.remove(email)
-        except ValueError:
+            emails.pop(uid)
+        except KeyError:
             return False
         with open(self.__email_file,'w', encoding='utf-8') as file:
-            for e in emails:
-                file.write(e+'\n')
+            file.write('uuid, email\n')
+            for id in emails:
+                file.write(id+', '+emails[id]+'\n')
         return True
     
 
