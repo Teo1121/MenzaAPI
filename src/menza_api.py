@@ -4,6 +4,8 @@ import xmlrpc.client
 import json
 import uuid
 
+from menza_error_codes import RPCCodes 
+
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 
@@ -29,35 +31,38 @@ class API:
     def __dupicate(self, email : str) -> bool:
         return email in self.read_email().values()
 
-    def verify_email(self, email : str) -> bool:
+    def verify_email(self, email : str) -> RPCCodes:
         if self.__dupicate(email):
-            return False
+            return RPCCodes.DUPLICATE
         uid = str(uuid.uuid1())
         self.emails2verify[uid] = email 
         with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
             return email_server.send_verification(email,uid)
 
-    def write_email(self, uid : str) -> bool:
+    def write_email(self, uid : str) -> RPCCodes:
         if not uid in self.emails2verify:
-            return False
+            if uid in self.read_email():
+                return RPCCodes.DUPLICATE
+            else:
+                return RPCCodes.NOT_FOUND
         with open(self.__email_file,'a', encoding='utf-8') as file:
             file.write(uid+', '+self.emails2verify[uid]+'\n')
         with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
-            email_server.send_confirmation(self.emails2verify[uid])  
+            temp = email_server.send_confirmation(self.emails2verify[uid])  
         self.emails2verify.pop(uid)
-        return True
+        return temp
     
-    def delete_email(self, uid : str) -> bool:
+    def delete_email(self, uid : str) -> RPCCodes:
         emails = self.read_email()
         try:
             emails.pop(uid)
         except KeyError:
-            return False
+            return RPCCodes.NOT_FOUND
         with open(self.__email_file,'w', encoding='utf-8') as file:
             file.write('uuid, email\n')
             for id in emails:
                 file.write(id+', '+emails[id]+'\n')
-        return True
+        return RPCCodes.SUCCESS
     
 
 
@@ -69,7 +74,7 @@ class API:
         with open(self.__menza_backup,'r', encoding='utf-8') as file:
             return json.loads(file.readline())
 
-    def write_menza(self, meal : dict) -> bool:
+    def write_menza(self, meal : dict) -> RPCCodes:
         try:
             with open(self.__menza_backup,'w', encoding='utf-8') as file:
                 file.write(json.dumps(self.read_menza(),ensure_ascii=False))
@@ -77,13 +82,13 @@ class API:
                 file.write(json.dumps(meal,ensure_ascii=False))
         except Exception as e:
             print(e)
-            return False
+            return RPCCodes.SERVER_ERROR
         if self.__check_change():
             with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email:
-                email.send_all()
-        return True
+                email.send_all(list(self.read_email().values()), self.read_menza())
+        return RPCCodes.SUCCESS
 
-    def __check_change(self):
+    def __check_change(self) -> bool:
         return not self.__backup() == self.read_menza()
     
 def main():

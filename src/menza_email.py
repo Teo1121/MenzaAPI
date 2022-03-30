@@ -1,4 +1,3 @@
-import xmlrpc.client  
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 
@@ -11,20 +10,23 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+from menza_error_codes import RPCCodes
+
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 class Email:
     SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-    def __send_message(self, message : MIMEText) -> bool:
+    def __send_message(self, message : MIMEText) -> RPCCodes:
       try:
         body = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')}
         message = (self.service.users().messages().send(userId='me', body=body)
                    .execute())
-        return True
+        return RPCCodes.SUCCESS
       except HttpError as error:
         print('An error occurred: %s' % error)
-        return False
+        return RPCCodes.SERVER_ERROR
 
     def __init__(self) -> None:
         creds = None
@@ -47,23 +49,19 @@ class Email:
         except HttpError as error:
             print(f'An error occurred: {error}')
 
-        self.api = xmlrpc.client.ServerProxy('http://127.0.0.1:8000')
-
-    def send_all(self) -> bool:
-        emails = self.api.read_email()
-        data = self.api.read_menza()
-
-        message = MIMEText("data: "+data)
+    def send_all(self, emails : list[str], data : dict) -> RPCCodes:
+        
+        message = MIMEText("data: "+str(data))
         message['from'] = "me"
         message['subject'] = "New menu"
 
         for m in emails:
             message['to'] = m
-            if not self.__send_message(message):
-                return False
-        return True
+            if self.__send_message(message) == RPCCodes.SERVER_ERROR:
+                return RPCCodes.SERVER_ERROR
+        return RPCCodes.SUCCESS
     
-    def send_verification(self, email : str, id : str) -> bool:
+    def send_verification(self, email : str, id : str) -> RPCCodes:
 
         link = "http://127.0.0.1:8081/verify/"+id
         message = MIMEText("link :"+link)
@@ -73,7 +71,7 @@ class Email:
 
         return self.__send_message(message)
     
-    def send_confirmation(self, email : str) -> bool:
+    def send_confirmation(self, email : str) -> RPCCodes:
 
         message = MIMEText("Thank you for subscribing!")
         message['to'] = email

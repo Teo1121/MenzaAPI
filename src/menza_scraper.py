@@ -3,6 +3,8 @@ import requests
 from bs4 import *
 import xmlrpc.client
 
+from menza_error_codes import RPCCodes
+
 class Scraper:
     URL = "https://www.scpu.hr/hr/prehrana/"
     DAYS = set(("monday","tuesday","wednesday","thursday","friday","saturday","sunday"))
@@ -48,14 +50,14 @@ class Scraper:
         
         self.parsed_menues = menues
     
-    def update(self) -> bool:
+    def update(self) -> RPCCodes:
         return self.api.write_menza(self.parsed_menues)
 
 def main():
     scraper = Scraper()
     scraper.scrap()
     scraper.parse()
-    while scraper.update():
+    while scraper.update() == RPCCodes.SUCCESS:
         sleep(60*30)
         scraper.scrap()
         scraper.parse()
