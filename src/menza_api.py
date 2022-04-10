@@ -3,11 +3,22 @@ from xmlrpc.server import SimpleXMLRPCRequestHandler
 import xmlrpc.client
 import json
 import uuid
+import sys
 
 from menza_error_codes import RPCCodes 
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
+
+    def log_message(self, format, *args):
+
+        with open("log.txt",'a') as file:
+            file.write("%s - - [%s] %s\n" %
+                     (self.address_string(),
+                      self.log_date_time_string(),
+                      format%args))
+
+        super().log_message(format,*args)
 
 class API:
     __instance = None

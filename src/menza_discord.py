@@ -1,6 +1,7 @@
 import discord
 import requests
 import json
+import os
 
 class MyClient(discord.Client):
     COMMANDS = {"!list"   : lambda args : requests.get("http://127.0.0.1:8081/menza").json(),
@@ -25,4 +26,4 @@ class MyClient(discord.Client):
                 await message.channel.send(response['message'])
 
 client = MyClient()
-client.run('OTU5ODQ5NTg2NTMxMzgxMzY4.Ykh3lg.rdubBNUVZDitMAuSTZr-AGUHaHo')
+client.run(os.environ['DISCORD_KEY'])
