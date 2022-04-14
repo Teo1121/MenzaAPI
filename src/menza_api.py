@@ -3,7 +3,6 @@ from xmlrpc.server import SimpleXMLRPCRequestHandler
 import xmlrpc.client
 import json
 import uuid
-import sys
 
 from menza_error_codes import RPCCodes 
 
@@ -37,27 +36,40 @@ class API:
     
     def read_email(self) -> dict:
         with open(self.__email_file,'r', encoding='utf-8') as file:
-            return dict([email[:-1].split(', ') for email in file.readlines()][1:])
+            header = file.readline()
+            result = []
+            for email in file.readlines():
+                email_list = email[:-1].split(', ')
+                result.append([
+                    email_list[0],[
+                        email_list[1],
+                        email_list[2].split('|')
+                    ]
+                ])
+            return dict(result)
     
     def __dupicate(self, email : str) -> bool:
-        return email in self.read_email().values()
+        for values in self.read_email().values():
+            if email in values:
+                return True
+        return False
 
-    def verify_email(self, email : str) -> RPCCodes:
+    def verify_email(self, email : str, subs : list[str]) -> RPCCodes:
         if self.__dupicate(email):
             return RPCCodes.DUPLICATE
         uid = str(uuid.uuid1())
         self.emails2verify[uid] = email 
         with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
-            return email_server.send_verification(email,uid)
+            return email_server.send_verification(email,uid,subs)
 
-    def write_email(self, uid : str) -> RPCCodes:
+    def write_email(self, uid : str, subs : str) -> RPCCodes:
         if not uid in self.emails2verify:
             if uid in self.read_email():
                 return RPCCodes.DUPLICATE
             else:
                 return RPCCodes.NOT_FOUND
         with open(self.__email_file,'a', encoding='utf-8') as file:
-            file.write(uid+', '+self.emails2verify[uid]+'\n')
+            file.write(uid+', '+self.emails2verify[uid]+', '+subs+'\n')
         with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
             temp = email_server.send_confirmation(self.emails2verify[uid])  
         self.emails2verify.pop(uid)
@@ -72,39 +84,46 @@ class API:
         with open(self.__email_file,'w', encoding='utf-8') as file:
             file.write('uuid, email\n')
             for id in emails:
-                file.write(id+', '+emails[id]+'\n')
+                file.write(id+', '+emails[id][0]+', '+'|'.join(emails[id][1])+'\n')
         return RPCCodes.SUCCESS
     
 
 
     def read_menza(self) -> dict:
-        with open(self.__menza_file,'r', encoding='utf8') as file:
+        with open(self.__menza_file,'r', encoding='utf-8') as file:
             return json.loads(file.readline())
 
     def __backup(self) -> dict:
         with open(self.__menza_backup,'r', encoding='utf-8') as file:
             return json.loads(file.readline())
 
-    def write_menza(self, meal : dict) -> RPCCodes:
+    def write_menza(self, meal : dict, menza : str) -> RPCCodes:
+        temp = self.read_menza()
         try:
             with open(self.__menza_backup,'w', encoding='utf-8') as file:
-                file.write(json.dumps(self.read_menza(),ensure_ascii=False))
+                file.write(json.dumps(temp,ensure_ascii=False))
+            temp[menza] = meal
             with open(self.__menza_file,'w', encoding='utf-8') as file:
-                file.write(json.dumps(meal,ensure_ascii=False))
+                file.write(json.dumps(temp,ensure_ascii=False))
         except Exception as e:
             print(e)
             return RPCCodes.SERVER_ERROR
-        if self.__check_change():
-            with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email:
-                email.send_all(list(self.read_email().values()), self.read_menza())
+        if self.__check_change(menza):
+            try:
+                with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_service:
+                    for email in self.read_email().values():
+                        if menza in email[1]:
+                            email_service.send(email[0],meal,menza)
+            except ConnectionRefusedError:
+                print("email service is offline")
         return RPCCodes.SUCCESS
 
-    def __check_change(self) -> bool:
-        return not self.__backup() == self.read_menza()
+    def __check_change(self, menza : str) -> bool:
+        return not self.__backup()[menza] == self.read_menza()[menza]
     
 def main():
     # Create server
-    with SimpleXMLRPCServer(('127.0.0.1', 8000),
+    with SimpleXMLRPCServer(('0.0.0.0', 8000),
                             requestHandler=RequestHandler) as server:
         server.register_introspection_functions()
 

@@ -16,13 +16,18 @@ def create_app():
     
     @app.route('/menza')
     def get_menza():
+        if 'menza' in request.args:
+            try:
+                return {"code":200,"data":api.read_menza()[request.args.get("menza")]}
+            except KeyError as e:
+                return bad_request(e)
         return {"code":200,"data":api.read_menza()}
 
     @app.route('/email', methods=['POST'])
     def post_email():
         data = request.get_json()
         try:
-            response = api.verify_email(data["email"])
+            response = api.verify_email(data["email"],data["subs"])
         except KeyError as e:
             return bad_request(e)
 
@@ -35,7 +40,7 @@ def create_app():
     
     @app.route('/verify/<uuid>')
     def verify_email(uuid):
-        response = api.write_email(uuid)
+        response = api.write_email(uuid,request.args.get('subs'))
         if response == RPCCodes.SUCCESS:
             return {"code":200,"message":"Thank you for subscribing"}
         if response == RPCCodes.DUPLICATE:
@@ -70,7 +75,7 @@ def create_app():
     return app
 
 def main():
-    create_app().run(port="8081")
+    create_app().run(host="0.0.0.0",port="8081")
 
 if __name__ == "__main__":
     main()

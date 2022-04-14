@@ -48,22 +48,19 @@ class Email:
             self.service = build('gmail', 'v1', credentials=creds)
         except HttpError as error:
             print(f'An error occurred: {error}')
-
-    def send_all(self, emails : list[str], data : dict) -> RPCCodes:
+    
+    def send(self, email : str, data : dict, menza : str) -> RPCCodes:
         
         message = MIMEText("data: "+str(data))
         message['from'] = "me"
-        message['subject'] = "New menu"
+        message['subject'] = "New menu in "+menza
+        message['to'] = email
 
-        for m in emails:
-            message['to'] = m
-            if self.__send_message(message) == RPCCodes.SERVER_ERROR:
-                return RPCCodes.SERVER_ERROR
-        return RPCCodes.SUCCESS
-    
-    def send_verification(self, email : str, id : str) -> RPCCodes:
+        return self.__send_message(message)
 
-        link = "http://127.0.0.1:8081/verify/"+id
+    def send_verification(self, email : str, id : str, subs : list[str]) -> RPCCodes:
+
+        link = "http://127.0.0.1:8081/verify/"+id+"?subs="+('|'.join(subs)).replace(' ','%20')
         message = MIMEText("link :"+link)
         message['to'] = email
         message['from'] = "me"
@@ -82,7 +79,7 @@ class Email:
             
 def main():
     # Create server
-    with SimpleXMLRPCServer(('127.0.0.1', 8080),
+    with SimpleXMLRPCServer(('0.0.0.0', 8080),
                             requestHandler=RequestHandler) as server:
         server.register_introspection_functions()
 

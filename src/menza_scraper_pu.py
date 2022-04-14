@@ -51,13 +51,18 @@ class Scraper:
         self.parsed_menues = menues
     
     def update(self) -> RPCCodes:
-        return self.api.write_menza(self.parsed_menues)
+        return self.api.write_menza(self.parsed_menues,"Studentski restoran Pula")
 
 def main():
     scraper = Scraper()
     scraper.scrap()
     scraper.parse()
-    while scraper.update() == RPCCodes.SUCCESS:
+    while True:
+        try:
+            if scraper.update() != RPCCodes.SUCCESS:
+                print("failed to save new data")
+        except ConnectionRefusedError:
+            print("mediator service is offline")
         sleep(60*30)
         scraper.scrap()
         scraper.parse()
