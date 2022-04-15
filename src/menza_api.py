@@ -27,6 +27,8 @@ class API:
         self.__menza_file = "./resources/menza.json"
         self.__menza_backup = "./resources/yesterday.json"
 
+        self.email_service = xmlrpc.client.ServerProxy('http://127.0.0.1:8080')
+
         self.emails2verify = {}
 
     def __new__(cls, *args, **kwargs):
@@ -59,8 +61,11 @@ class API:
             return RPCCodes.DUPLICATE
         uid = str(uuid.uuid1())
         self.emails2verify[uid] = email 
-        with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
-            return email_server.send_verification(email,uid,subs)
+        try:
+            return self.email_service.send_verification(email,uid,subs)
+        except ConnectionRefusedError:
+            print("email service is offline")
+            return RPCCodes.SERVER_ERROR
 
     def write_email(self, uid : str, subs : str) -> RPCCodes:
         if not uid in self.emails2verify:
@@ -70,8 +75,11 @@ class API:
                 return RPCCodes.NOT_FOUND
         with open(self.__email_file,'a', encoding='utf-8') as file:
             file.write(uid+', '+self.emails2verify[uid]+', '+subs+'\n')
-        with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_server:
-            temp = email_server.send_confirmation(self.emails2verify[uid])  
+        try:
+            temp = self.email_service.send_confirmation(self.emails2verify[uid])
+        except ConnectionRefusedError:
+            print("email service is offline")
+            temp = RPCCodes.SUCCESS
         self.emails2verify.pop(uid)
         return temp
     
@@ -110,16 +118,18 @@ class API:
             return RPCCodes.SERVER_ERROR
         if self.__check_change(menza):
             try:
-                with xmlrpc.client.ServerProxy('http://127.0.0.1:8080') as email_service:
-                    for email in self.read_email().values():
-                        if menza in email[1]:
-                            email_service.send(email[0],meal,menza)
+                for email in self.read_email().values():
+                    if menza in email[1]:
+                        self.email_service.send(email[0],meal,menza)
             except ConnectionRefusedError:
                 print("email service is offline")
         return RPCCodes.SUCCESS
 
     def __check_change(self, menza : str) -> bool:
-        return not self.__backup()[menza] == self.read_menza()[menza]
+        try:
+            return not self.__backup()[menza] == self.read_menza()[menza]
+        except KeyError:
+            return True
     
 def main():
     # Create server

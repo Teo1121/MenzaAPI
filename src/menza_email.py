@@ -35,7 +35,7 @@ class Email:
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
+                creds.refresh(Request()) # https://support.google.com/cloud/answer/10311615#zippy=%2Ctesting
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     'credentials.json', Email.SCOPES)
