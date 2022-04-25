@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+// naming convention for protobuff https://developers.google.com/protocol-buffers/docs/style
+
+message Email {
+    int32 id = 1;
+    string uuid = 2;
+    string mail = 3;
+}
+
+enum Meal {
+    UNKNOWN = 0;
+    LUNCH = 1;
+    DINNER = 2;
+}
+
+message Dish {
+    int32 id = 1;
+    string name = 2;
+}
+
+message Restaurant {
+    int32 id = 1;
+    string name = 2;
+}
+
+message Menu {
+    int32 id = 1;
+    string name = 2; 
+    Meal meal = 3;
+}
+
+message Offer {
+    int32 id = 1;
+    int32 id_restaurant = 2;
+    int32 id_menu = 3;
+    string date = 4; // ISO 8601 date string
+}
+
+message DishOffer {
+    int32 id = 1;
+    int32 id_dish = 2;
+    int32 id_offer = 3;  
+}
+
+message Model {
+    oneof model {
+        Email email = 1;
+        Dish dish = 2;
+        Restaurant restaurant = 3;
+        Menu menu = 4;
+        Offer offer = 5;
+        DishOffer dish_offer = 6;
+    }  
+}
+
+
+message Query {
+    string what = 1;
+    string table = 2;
+    map<string,string> where = 3;
+}
+
+message QueryResult {
+    repeated Model data = 1;
+}
+
+message Menza {
+    message MenuArray {
+        Menu menu = 1;
+        repeated Dish dishes = 2;
+    }
+    Restaurant restaurant = 1;
+    repeated MenuArray lunch = 2;
+    repeated MenuArray dinner = 3;
+}
+
+message Response {
+    oneof message {
+        string msg = 1;
+        int32 model_id = 2;
+    }
+}
+
+service Database {
+    rpc Save(Model) returns (Response) {}
+    rpc Load(Query) returns (QueryResult) {}
+}
+
+service Mediator {
+    rpc WriteEmail(Email) returns (Response) {}
+    rpc ReadEmails(Query) returns (QueryResult) {}
+    rpc WriteMenza(Menza) returns (Response) {}
+    rpc ReadMenza(Query) returns (Menza) {}
+}

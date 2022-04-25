@@ -1,0 +1,5 @@
+beautifulsoup4==4.11.1
+grpc==1.0.0
+grpcio==1.44.0
+protobuf==3.20.1
+requests==2.27.1
