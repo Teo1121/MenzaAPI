@@ -18,7 +18,7 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
 
     def ReadEmails(self, request, context):
         stub = menza_pb2_grpc.DatabaseStub(self.sql_server)
-        response = stub.Load(menza_pb2.Query(what='*',table='Email',where={}))
+        response = stub.Load(menza_pb2.DatabaseQuery(what='*',table='Email',where={}))
         return response
 
     def WriteMenza(self, request, context):
@@ -50,21 +50,24 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
 
     def ReadMenza(self, request, context):
         stub = menza_pb2_grpc.DatabaseStub(self.sql_server)
-        restaurant_query_result = stub.Load(menza_pb2.Query(what='*', table='Restaurant', where={'name':request.what}))
+        restaurant_query_result = stub.Load(menza_pb2.DatabaseQuery(what='*', table='Restaurant', where={'name':request.restaurant_name}))
         if len(restaurant_query_result.data) == 0:
             context.set_code(grpc.StatusCode.NOT_FOUND)
-            context.set_details('Restaurant '+request.what+' was not found in the database')
+            context.set_details('Restaurant '+request.restaurant_name+' was not found in the database')
             return menza_pb2.Menza()
         restaurant = restaurant_query_result.data[0].restaurant
-        offers = stub.Load(menza_pb2.Query(what='*' , table='Offer', where={'id_restaurant':str(restaurant.id)})).data
+
+        # this should probably be a seperate method inside the database service
+        latest_offers = "Offer INNER JOIN (SELECT id_restaurant, max(date) as MaxDate FROM offer GROUP BY id_restaurant) AS tmp on Offer.id_restaurant = tmp.id_restaurant and Offer.date = tmp.MaxDate"
+        offers = stub.Load(menza_pb2.DatabaseQuery(what='*' , table=latest_offers, where={'Offer.id_restaurant':str(restaurant.id)})).data
 
         lunch = []
         dinner = []
 
         for model in offers:
-            menu = stub.Load(menza_pb2.Query(what='*', table='Menu', where={'id':str(model.offer.id_menu)})).data[0].menu
-            dish_offers = [model.dish_offer for model in stub.Load(menza_pb2.Query(what='*', table='DishOffer', where={'id_offer':str(model.offer.id)})).data]
-            dishes = [stub.Load(menza_pb2.Query(what='*', table='Dish', where={'id':str(dish_offer.id_dish)})).data[0].dish for dish_offer in dish_offers]
+            menu = stub.Load(menza_pb2.DatabaseQuery(what='*', table='Menu', where={'id':str(model.offer.id_menu)})).data[0].menu
+            dish_offers = [model.dish_offer for model in stub.Load(menza_pb2.DatabaseQuery(what='*', table='DishOffer', where={'id_offer':str(model.offer.id)})).data]
+            dishes = [stub.Load(menza_pb2.DatabaseQuery(what='*', table='Dish', where={'id':str(dish_offer.id_dish)})).data[0].dish for dish_offer in dish_offers]
             if menu.meal == menza_pb2.Meal.LUNCH:
                 lunch.append(menza_pb2.Menza.MenuArray(menu=menu,dishes=dishes))
             elif menu.meal == menza_pb2.Meal.DINNER:

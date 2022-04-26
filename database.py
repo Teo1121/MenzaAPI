@@ -125,7 +125,7 @@ class Database(menza_pb2_grpc.DatabaseServicer):
         context.set_code(grpc.StatusCode.OK)
         return menza_pb2.Response(model_id=cursor.lastrowid)
 
-    def Load(self, request : menza_pb2.Query, context) -> menza_pb2.QueryResult:
+    def Load(self, request : menza_pb2.DatabaseQuery, context) -> menza_pb2.QueryResult:
         where = dict(request.where)
         cursor = self.conn.cursor()
         query = "SELECT {} FROM {} WHERE {}".format(
@@ -139,9 +139,9 @@ class Database(menza_pb2_grpc.DatabaseServicer):
         except sqlite3.OperationalError:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             return menza_pb2.QueryResult()
-        model = getattr(menza_pb2,request.table)
+        model = getattr(menza_pb2,request.table.split(' ')[0])
 
-        res = [menza_pb2.Model(**{re.sub(r'(?<!^)(?=[A-Z])', '_', request.table).lower():model(**dict([(name,item[i]) for i,name in enumerate(model.DESCRIPTOR.fields_by_name) if name in request.what or len(request.what) == 0 or '*' in request.what]))}) for item in cursor.fetchall()]
+        res = [menza_pb2.Model(**{re.sub(r'(?<!^)(?=[A-Z])', '_', request.table.split(' ')[0]).lower():model(**dict([(name,item[i]) for i,name in enumerate(model.DESCRIPTOR.fields_by_name) if name in request.what or len(request.what) == 0 or '*' in request.what]))}) for item in cursor.fetchall()]
         response = menza_pb2.QueryResult(data=res)
         context.set_code(grpc.StatusCode.OK)
         return response

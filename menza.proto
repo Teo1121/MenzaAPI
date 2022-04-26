@@ -55,10 +55,17 @@ message Model {
 }
 
 
-message Query {
+message DatabaseQuery {
     string what = 1;
     string table = 2;
     map<string,string> where = 3;
+}
+
+message MenzaQuery {
+    string restaurant_name = 1;
+}
+
+message EmailQuery {
 }
 
 message QueryResult {
@@ -84,12 +91,12 @@ message Response {
 
 service Database {
     rpc Save(Model) returns (Response) {}
-    rpc Load(Query) returns (QueryResult) {}
+    rpc Load(DatabaseQuery) returns (QueryResult) {}
 }
 
 service Mediator {
     rpc WriteEmail(Email) returns (Response) {}
-    rpc ReadEmails(Query) returns (QueryResult) {}
+    rpc ReadEmails(EmailQuery) returns (QueryResult) {}
     rpc WriteMenza(Menza) returns (Response) {}
-    rpc ReadMenza(Query) returns (Menza) {}
+    rpc ReadMenza(MenzaQuery) returns (Menza) {}
 }

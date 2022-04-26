@@ -21,7 +21,7 @@ class DatabaseStub(object):
                 )
         self.Load = channel.unary_unary(
                 '/Database/Load',
-                request_serializer=menza__pb2.Query.SerializeToString,
+                request_serializer=menza__pb2.DatabaseQuery.SerializeToString,
                 response_deserializer=menza__pb2.QueryResult.FromString,
                 )
 
@@ -51,7 +51,7 @@ def add_DatabaseServicer_to_server(servicer, server):
             ),
             'Load': grpc.unary_unary_rpc_method_handler(
                     servicer.Load,
-                    request_deserializer=menza__pb2.Query.FromString,
+                    request_deserializer=menza__pb2.DatabaseQuery.FromString,
                     response_serializer=menza__pb2.QueryResult.SerializeToString,
             ),
     }
@@ -93,7 +93,7 @@ class Database(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Database/Load',
-            menza__pb2.Query.SerializeToString,
+            menza__pb2.DatabaseQuery.SerializeToString,
             menza__pb2.QueryResult.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -115,7 +115,7 @@ class MediatorStub(object):
                 )
         self.ReadEmails = channel.unary_unary(
                 '/Mediator/ReadEmails',
-                request_serializer=menza__pb2.Query.SerializeToString,
+                request_serializer=menza__pb2.EmailQuery.SerializeToString,
                 response_deserializer=menza__pb2.QueryResult.FromString,
                 )
         self.WriteMenza = channel.unary_unary(
@@ -125,7 +125,7 @@ class MediatorStub(object):
                 )
         self.ReadMenza = channel.unary_unary(
                 '/Mediator/ReadMenza',
-                request_serializer=menza__pb2.Query.SerializeToString,
+                request_serializer=menza__pb2.MenzaQuery.SerializeToString,
                 response_deserializer=menza__pb2.Menza.FromString,
                 )
 
@@ -167,7 +167,7 @@ def add_MediatorServicer_to_server(servicer, server):
             ),
             'ReadEmails': grpc.unary_unary_rpc_method_handler(
                     servicer.ReadEmails,
-                    request_deserializer=menza__pb2.Query.FromString,
+                    request_deserializer=menza__pb2.EmailQuery.FromString,
                     response_serializer=menza__pb2.QueryResult.SerializeToString,
             ),
             'WriteMenza': grpc.unary_unary_rpc_method_handler(
@@ -177,7 +177,7 @@ def add_MediatorServicer_to_server(servicer, server):
             ),
             'ReadMenza': grpc.unary_unary_rpc_method_handler(
                     servicer.ReadMenza,
-                    request_deserializer=menza__pb2.Query.FromString,
+                    request_deserializer=menza__pb2.MenzaQuery.FromString,
                     response_serializer=menza__pb2.Menza.SerializeToString,
             ),
     }
@@ -219,7 +219,7 @@ class Mediator(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Mediator/ReadEmails',
-            menza__pb2.Query.SerializeToString,
+            menza__pb2.EmailQuery.SerializeToString,
             menza__pb2.QueryResult.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -253,7 +253,7 @@ class Mediator(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Mediator/ReadMenza',
-            menza__pb2.Query.SerializeToString,
+            menza__pb2.MenzaQuery.SerializeToString,
             menza__pb2.Menza.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
