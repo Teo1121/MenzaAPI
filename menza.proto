@@ -5,7 +5,7 @@ syntax = "proto3";
 message Email {
     int32 id = 1;
     string uuid = 2;
-    string mail = 3;
+    string address = 3;
 }
 
 enum Meal {
@@ -43,6 +43,12 @@ message DishOffer {
     int32 id_offer = 3;  
 }
 
+message Subscription {
+    int32 id = 1;
+    int32 id_email = 2;
+    int32 id_restaurant = 3;
+}
+
 message Model {
     oneof model {
         Email email = 1;
@@ -51,6 +57,7 @@ message Model {
         Menu menu = 4;
         Offer offer = 5;
         DishOffer dish_offer = 6;
+        Subscription subscription = 7;
     }  
 }
 
@@ -82,6 +89,21 @@ message Menza {
     repeated MenuArray dinner = 3;
 }
 
+message MenzaMail {
+    Email email = 1;
+    Menza data = 2;
+}
+
+message SubscribeMail {
+    Email email = 1;
+    repeated string restaurants = 2;  
+}
+
+message ConfirmationMail {
+    Email email = 1;
+    bool has_subscribed = 2;
+}
+
 message Response {
     oneof message {
         string msg = 1;
@@ -95,8 +117,16 @@ service Database {
 }
 
 service Mediator {
+    rpc NewEmail(Email) returns (Response) {}
     rpc WriteEmail(Email) returns (Response) {}
+    rpc SubscribeEmail(SubscribeMail) returns (Response) {}
     rpc ReadEmails(EmailQuery) returns (QueryResult) {}
     rpc WriteMenza(Menza) returns (Response) {}
     rpc ReadMenza(MenzaQuery) returns (Menza) {}
+}
+
+service EmailService {
+    rpc SendEmail(MenzaMail) returns (Response) {}
+    rpc SendVerification(Email) returns (Response) {}
+    rpc SendConfirmation(ConfirmationMail) returns (Response) {}
 }

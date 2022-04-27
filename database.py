@@ -14,15 +14,15 @@ class Database(menza_pb2_grpc.DatabaseServicer):
         super().__init__()
 
         if testing:
-            self.conn = sqlite3.connect('test.db',check_same_thread=False)
+            self.conn = sqlite3.connect(':memory:',check_same_thread=False)
 
 
             cursor = self.conn.cursor()
 
             cursor.execute("""CREATE TABLE Email ( 
                             id INTEGER PRIMARY KEY, 
-                            uuid TEXT,
-                            mail TEXT 
+                            uuid TEXT UNIQUE,
+                            address TEXT 
                             )""")
             cursor.execute("""CREATE TABLE Dish ( 
                             id INTEGER PRIMARY KEY, 
@@ -51,6 +51,13 @@ class Database(menza_pb2_grpc.DatabaseServicer):
                             id_offer INTEGER,
                             FOREIGN KEY(id_dish) REFERENCES Dish(id),
                             FOREIGN KEY(id_offer) REFERENCES Offer(id)
+                            )""")
+            cursor.execute("""CREATE TABLE Subscription (
+                            id INTEGER PRIMARY KEY,
+                            id_email INTEGER,
+                            id_restaurant INTEGER,
+                            FOREIGN KEY(id_email) REFERENCES Email(id),
+                            FOREIGN KEY(id_restaurant) REFERENCES Restaurant(id)
                             )""")
             
             self.conn.commit()
@@ -103,19 +110,16 @@ class Database(menza_pb2_grpc.DatabaseServicer):
                                     use_integers_for_enums=True)[model_type]
 
         model.pop('id')
-        print(model)
         query = "SELECT * FROM {} WHERE {}".format(
                                                 ''.join(word.title() for word in model_type.split('_')),
                                                 ' AND '.join([key+"='"+str(model[key])+"'" for key in model])
                                                 )
-        print(query)
         cursor = self.conn.cursor()
 
         cursor.execute(query)
         duplicate = cursor.fetchall()
         if len(duplicate) > 0:
             context.set_code(grpc.StatusCode.OK)
-            print(duplicate[0][0],type(duplicate[0][0]))
             return menza_pb2.Response(model_id=duplicate[0][0])
 
         query = "INSERT INTO {} VALUES (NULL{})".format(''.join(word.title() for word in model_type.split('_'))+' (id, '+', '.join(model.keys())+')',', ?'*len(model))
@@ -141,13 +145,28 @@ class Database(menza_pb2_grpc.DatabaseServicer):
             return menza_pb2.QueryResult()
         model = getattr(menza_pb2,request.table.split(' ')[0])
 
-        res = [menza_pb2.Model(**{re.sub(r'(?<!^)(?=[A-Z])', '_', request.table.split(' ')[0]).lower():model(**dict([(name,item[i]) for i,name in enumerate(model.DESCRIPTOR.fields_by_name) if name in request.what or len(request.what) == 0 or '*' in request.what]))}) for item in cursor.fetchall()]
+        res = []
+        for item in cursor.fetchall():
+            temp = []
+            for i, name in enumerate(model.DESCRIPTOR.fields_by_name):
+                values = request.what.replace(' ','').split(',')
+                if name in values:
+                    temp.append((name,item[values.index(name)]))
+                elif len(request.what) == 0 or '*' in request.what:
+                    temp.append((name,item[i]))
+            res.append(menza_pb2.Model(**{re.sub(r'(?<!^)(?=[A-Z])', '_', request.table.split(' ')[0]).lower():model(**dict(temp))}))
+
+        #res = [menza_pb2.Model(**{re.sub(r'(?<!^)(?=[A-Z])', '_', request.table.split(' ')[0]).lower():model(**dict([(name,item[i]) for i,name in enumerate(model.DESCRIPTOR.fields_by_name) if name in request.what or len(request.what) == 0 or '*' in request.what]))}) for item in cursor.fetchall()]
         response = menza_pb2.QueryResult(data=res)
         context.set_code(grpc.StatusCode.OK)
         return response
 
-server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-menza_pb2_grpc.add_DatabaseServicer_to_server(Database(),server)
-server.add_insecure_port('[::]:50052')
-server.start()
-server.wait_for_termination()
+def main():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    menza_pb2_grpc.add_DatabaseServicer_to_server(Database(),server)
+    server.add_insecure_port('[::]:50052')
+    server.start()
+    server.wait_for_termination()
+
+if __name__ == "__main__": 
+    main()

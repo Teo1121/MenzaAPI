@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bmenza.proto\"/\n\x05\x45mail\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04uuid\x18\x02 \x01(\t\x12\x0c\n\x04mail\x18\x03 \x01(\t\" \n\x04\x44ish\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"&\n\nRestaurant\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"5\n\x04Menu\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x04meal\x18\x03 \x01(\x0e\x32\x05.Meal\"I\n\x05Offer\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x15\n\rid_restaurant\x18\x02 \x01(\x05\x12\x0f\n\x07id_menu\x18\x03 \x01(\x05\x12\x0c\n\x04\x64\x61te\x18\x04 \x01(\t\":\n\tDishOffer\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07id_dish\x18\x02 \x01(\x05\x12\x10\n\x08id_offer\x18\x03 \x01(\x05\"\xb5\x01\n\x05Model\x12\x17\n\x05\x65mail\x18\x01 \x01(\x0b\x32\x06.EmailH\x00\x12\x15\n\x04\x64ish\x18\x02 \x01(\x0b\x32\x05.DishH\x00\x12!\n\nrestaurant\x18\x03 \x01(\x0b\x32\x0b.RestaurantH\x00\x12\x15\n\x04menu\x18\x04 \x01(\x0b\x32\x05.MenuH\x00\x12\x17\n\x05offer\x18\x05 \x01(\x0b\x32\x06.OfferH\x00\x12 \n\ndish_offer\x18\x06 \x01(\x0b\x32\n.DishOfferH\x00\x42\x07\n\x05model\"\x84\x01\n\rDatabaseQuery\x12\x0c\n\x04what\x18\x01 \x01(\t\x12\r\n\x05table\x18\x02 \x01(\t\x12(\n\x05where\x18\x03 \x03(\x0b\x32\x19.DatabaseQuery.WhereEntry\x1a,\n\nWhereEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"%\n\nMenzaQuery\x12\x17\n\x0frestaurant_name\x18\x01 \x01(\t\"\x0c\n\nEmailQuery\"#\n\x0bQueryResult\x12\x14\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x06.Model\"\xa4\x01\n\x05Menza\x12\x1f\n\nrestaurant\x18\x01 \x01(\x0b\x32\x0b.Restaurant\x12\x1f\n\x05lunch\x18\x02 \x03(\x0b\x32\x10.Menza.MenuArray\x12 \n\x06\x64inner\x18\x03 \x03(\x0b\x32\x10.Menza.MenuArray\x1a\x37\n\tMenuArray\x12\x13\n\x04menu\x18\x01 \x01(\x0b\x32\x05.Menu\x12\x15\n\x06\x64ishes\x18\x02 \x03(\x0b\x32\x05.Dish\"8\n\x08Response\x12\r\n\x03msg\x18\x01 \x01(\tH\x00\x12\x12\n\x08model_id\x18\x02 \x01(\x05H\x00\x42\t\n\x07message**\n\x04Meal\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05LUNCH\x10\x01\x12\n\n\x06\x44INNER\x10\x02\x32O\n\x08\x44\x61tabase\x12\x1b\n\x04Save\x12\x06.Model\x1a\t.Response\"\x00\x12&\n\x04Load\x12\x0e.DatabaseQuery\x1a\x0c.QueryResult\"\x00\x32\x9f\x01\n\x08Mediator\x12!\n\nWriteEmail\x12\x06.Email\x1a\t.Response\"\x00\x12)\n\nReadEmails\x12\x0b.EmailQuery\x1a\x0c.QueryResult\"\x00\x12!\n\nWriteMenza\x12\x06.Menza\x1a\t.Response\"\x00\x12\"\n\tReadMenza\x12\x0b.MenzaQuery\x1a\x06.Menza\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bmenza.proto\"2\n\x05\x45mail\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04uuid\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\" \n\x04\x44ish\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"&\n\nRestaurant\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\"5\n\x04Menu\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x04meal\x18\x03 \x01(\x0e\x32\x05.Meal\"I\n\x05Offer\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x15\n\rid_restaurant\x18\x02 \x01(\x05\x12\x0f\n\x07id_menu\x18\x03 \x01(\x05\x12\x0c\n\x04\x64\x61te\x18\x04 \x01(\t\":\n\tDishOffer\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07id_dish\x18\x02 \x01(\x05\x12\x10\n\x08id_offer\x18\x03 \x01(\x05\"C\n\x0cSubscription\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08id_email\x18\x02 \x01(\x05\x12\x15\n\rid_restaurant\x18\x03 \x01(\x05\"\xdc\x01\n\x05Model\x12\x17\n\x05\x65mail\x18\x01 \x01(\x0b\x32\x06.EmailH\x00\x12\x15\n\x04\x64ish\x18\x02 \x01(\x0b\x32\x05.DishH\x00\x12!\n\nrestaurant\x18\x03 \x01(\x0b\x32\x0b.RestaurantH\x00\x12\x15\n\x04menu\x18\x04 \x01(\x0b\x32\x05.MenuH\x00\x12\x17\n\x05offer\x18\x05 \x01(\x0b\x32\x06.OfferH\x00\x12 \n\ndish_offer\x18\x06 \x01(\x0b\x32\n.DishOfferH\x00\x12%\n\x0csubscription\x18\x07 \x01(\x0b\x32\r.SubscriptionH\x00\x42\x07\n\x05model\"\x84\x01\n\rDatabaseQuery\x12\x0c\n\x04what\x18\x01 \x01(\t\x12\r\n\x05table\x18\x02 \x01(\t\x12(\n\x05where\x18\x03 \x03(\x0b\x32\x19.DatabaseQuery.WhereEntry\x1a,\n\nWhereEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"%\n\nMenzaQuery\x12\x17\n\x0frestaurant_name\x18\x01 \x01(\t\"\x0c\n\nEmailQuery\"#\n\x0bQueryResult\x12\x14\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x06.Model\"\xa4\x01\n\x05Menza\x12\x1f\n\nrestaurant\x18\x01 \x01(\x0b\x32\x0b.Restaurant\x12\x1f\n\x05lunch\x18\x02 \x03(\x0b\x32\x10.Menza.MenuArray\x12 \n\x06\x64inner\x18\x03 \x03(\x0b\x32\x10.Menza.MenuArray\x1a\x37\n\tMenuArray\x12\x13\n\x04menu\x18\x01 \x01(\x0b\x32\x05.Menu\x12\x15\n\x06\x64ishes\x18\x02 \x03(\x0b\x32\x05.Dish\"8\n\tMenzaMail\x12\x15\n\x05\x65mail\x18\x01 \x01(\x0b\x32\x06.Email\x12\x14\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x06.Menza\";\n\rSubscribeMail\x12\x15\n\x05\x65mail\x18\x01 \x01(\x0b\x32\x06.Email\x12\x13\n\x0brestaurants\x18\x02 \x03(\t\"A\n\x10\x43onfirmationMail\x12\x15\n\x05\x65mail\x18\x01 \x01(\x0b\x32\x06.Email\x12\x16\n\x0ehas_subscribed\x18\x02 \x01(\x08\"8\n\x08Response\x12\r\n\x03msg\x18\x01 \x01(\tH\x00\x12\x12\n\x08model_id\x18\x02 \x01(\x05H\x00\x42\t\n\x07message**\n\x04Meal\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05LUNCH\x10\x01\x12\n\n\x06\x44INNER\x10\x02\x32O\n\x08\x44\x61tabase\x12\x1b\n\x04Save\x12\x06.Model\x1a\t.Response\"\x00\x12&\n\x04Load\x12\x0e.DatabaseQuery\x1a\x0c.QueryResult\"\x00\x32\xef\x01\n\x08Mediator\x12\x1f\n\x08NewEmail\x12\x06.Email\x1a\t.Response\"\x00\x12!\n\nWriteEmail\x12\x06.Email\x1a\t.Response\"\x00\x12-\n\x0eSubscribeEmail\x12\x0e.SubscribeMail\x1a\t.Response\"\x00\x12)\n\nReadEmails\x12\x0b.EmailQuery\x1a\x0c.QueryResult\"\x00\x12!\n\nWriteMenza\x12\x06.Menza\x1a\t.Response\"\x00\x12\"\n\tReadMenza\x12\x0b.MenzaQuery\x1a\x06.Menza\"\x00\x32\x91\x01\n\x0c\x45mailService\x12$\n\tSendEmail\x12\n.MenzaMail\x1a\t.Response\"\x00\x12\'\n\x10SendVerification\x12\x06.Email\x1a\t.Response\"\x00\x12\x32\n\x10SendConfirmation\x12\x11.ConfirmationMail\x1a\t.Response\"\x00\x62\x06proto3')
 
 _MEAL = DESCRIPTOR.enum_types_by_name['Meal']
 Meal = enum_type_wrapper.EnumTypeWrapper(_MEAL)
@@ -30,6 +30,7 @@ _RESTAURANT = DESCRIPTOR.message_types_by_name['Restaurant']
 _MENU = DESCRIPTOR.message_types_by_name['Menu']
 _OFFER = DESCRIPTOR.message_types_by_name['Offer']
 _DISHOFFER = DESCRIPTOR.message_types_by_name['DishOffer']
+_SUBSCRIPTION = DESCRIPTOR.message_types_by_name['Subscription']
 _MODEL = DESCRIPTOR.message_types_by_name['Model']
 _DATABASEQUERY = DESCRIPTOR.message_types_by_name['DatabaseQuery']
 _DATABASEQUERY_WHEREENTRY = _DATABASEQUERY.nested_types_by_name['WhereEntry']
@@ -38,6 +39,9 @@ _EMAILQUERY = DESCRIPTOR.message_types_by_name['EmailQuery']
 _QUERYRESULT = DESCRIPTOR.message_types_by_name['QueryResult']
 _MENZA = DESCRIPTOR.message_types_by_name['Menza']
 _MENZA_MENUARRAY = _MENZA.nested_types_by_name['MenuArray']
+_MENZAMAIL = DESCRIPTOR.message_types_by_name['MenzaMail']
+_SUBSCRIBEMAIL = DESCRIPTOR.message_types_by_name['SubscribeMail']
+_CONFIRMATIONMAIL = DESCRIPTOR.message_types_by_name['ConfirmationMail']
 _RESPONSE = DESCRIPTOR.message_types_by_name['Response']
 Email = _reflection.GeneratedProtocolMessageType('Email', (_message.Message,), {
   'DESCRIPTOR' : _EMAIL,
@@ -80,6 +84,13 @@ DishOffer = _reflection.GeneratedProtocolMessageType('DishOffer', (_message.Mess
   # @@protoc_insertion_point(class_scope:DishOffer)
   })
 _sym_db.RegisterMessage(DishOffer)
+
+Subscription = _reflection.GeneratedProtocolMessageType('Subscription', (_message.Message,), {
+  'DESCRIPTOR' : _SUBSCRIPTION,
+  '__module__' : 'menza_pb2'
+  # @@protoc_insertion_point(class_scope:Subscription)
+  })
+_sym_db.RegisterMessage(Subscription)
 
 Model = _reflection.GeneratedProtocolMessageType('Model', (_message.Message,), {
   'DESCRIPTOR' : _MODEL,
@@ -139,6 +150,27 @@ Menza = _reflection.GeneratedProtocolMessageType('Menza', (_message.Message,), {
 _sym_db.RegisterMessage(Menza)
 _sym_db.RegisterMessage(Menza.MenuArray)
 
+MenzaMail = _reflection.GeneratedProtocolMessageType('MenzaMail', (_message.Message,), {
+  'DESCRIPTOR' : _MENZAMAIL,
+  '__module__' : 'menza_pb2'
+  # @@protoc_insertion_point(class_scope:MenzaMail)
+  })
+_sym_db.RegisterMessage(MenzaMail)
+
+SubscribeMail = _reflection.GeneratedProtocolMessageType('SubscribeMail', (_message.Message,), {
+  'DESCRIPTOR' : _SUBSCRIBEMAIL,
+  '__module__' : 'menza_pb2'
+  # @@protoc_insertion_point(class_scope:SubscribeMail)
+  })
+_sym_db.RegisterMessage(SubscribeMail)
+
+ConfirmationMail = _reflection.GeneratedProtocolMessageType('ConfirmationMail', (_message.Message,), {
+  'DESCRIPTOR' : _CONFIRMATIONMAIL,
+  '__module__' : 'menza_pb2'
+  # @@protoc_insertion_point(class_scope:ConfirmationMail)
+  })
+_sym_db.RegisterMessage(ConfirmationMail)
+
 Response = _reflection.GeneratedProtocolMessageType('Response', (_message.Message,), {
   'DESCRIPTOR' : _RESPONSE,
   '__module__' : 'menza_pb2'
@@ -148,45 +180,56 @@ _sym_db.RegisterMessage(Response)
 
 _DATABASE = DESCRIPTOR.services_by_name['Database']
 _MEDIATOR = DESCRIPTOR.services_by_name['Mediator']
+_EMAILSERVICE = DESCRIPTOR.services_by_name['EmailService']
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _DATABASEQUERY_WHEREENTRY._options = None
   _DATABASEQUERY_WHEREENTRY._serialized_options = b'8\001'
-  _MEAL._serialized_start=962
-  _MEAL._serialized_end=1004
+  _MEAL._serialized_start=1259
+  _MEAL._serialized_end=1301
   _EMAIL._serialized_start=15
-  _EMAIL._serialized_end=62
-  _DISH._serialized_start=64
-  _DISH._serialized_end=96
-  _RESTAURANT._serialized_start=98
-  _RESTAURANT._serialized_end=136
-  _MENU._serialized_start=138
-  _MENU._serialized_end=191
-  _OFFER._serialized_start=193
-  _OFFER._serialized_end=266
-  _DISHOFFER._serialized_start=268
-  _DISHOFFER._serialized_end=326
-  _MODEL._serialized_start=329
-  _MODEL._serialized_end=510
-  _DATABASEQUERY._serialized_start=513
-  _DATABASEQUERY._serialized_end=645
-  _DATABASEQUERY_WHEREENTRY._serialized_start=601
-  _DATABASEQUERY_WHEREENTRY._serialized_end=645
-  _MENZAQUERY._serialized_start=647
-  _MENZAQUERY._serialized_end=684
-  _EMAILQUERY._serialized_start=686
-  _EMAILQUERY._serialized_end=698
-  _QUERYRESULT._serialized_start=700
-  _QUERYRESULT._serialized_end=735
-  _MENZA._serialized_start=738
-  _MENZA._serialized_end=902
-  _MENZA_MENUARRAY._serialized_start=847
-  _MENZA_MENUARRAY._serialized_end=902
-  _RESPONSE._serialized_start=904
-  _RESPONSE._serialized_end=960
-  _DATABASE._serialized_start=1006
-  _DATABASE._serialized_end=1085
-  _MEDIATOR._serialized_start=1088
-  _MEDIATOR._serialized_end=1247
+  _EMAIL._serialized_end=65
+  _DISH._serialized_start=67
+  _DISH._serialized_end=99
+  _RESTAURANT._serialized_start=101
+  _RESTAURANT._serialized_end=139
+  _MENU._serialized_start=141
+  _MENU._serialized_end=194
+  _OFFER._serialized_start=196
+  _OFFER._serialized_end=269
+  _DISHOFFER._serialized_start=271
+  _DISHOFFER._serialized_end=329
+  _SUBSCRIPTION._serialized_start=331
+  _SUBSCRIPTION._serialized_end=398
+  _MODEL._serialized_start=401
+  _MODEL._serialized_end=621
+  _DATABASEQUERY._serialized_start=624
+  _DATABASEQUERY._serialized_end=756
+  _DATABASEQUERY_WHEREENTRY._serialized_start=712
+  _DATABASEQUERY_WHEREENTRY._serialized_end=756
+  _MENZAQUERY._serialized_start=758
+  _MENZAQUERY._serialized_end=795
+  _EMAILQUERY._serialized_start=797
+  _EMAILQUERY._serialized_end=809
+  _QUERYRESULT._serialized_start=811
+  _QUERYRESULT._serialized_end=846
+  _MENZA._serialized_start=849
+  _MENZA._serialized_end=1013
+  _MENZA_MENUARRAY._serialized_start=958
+  _MENZA_MENUARRAY._serialized_end=1013
+  _MENZAMAIL._serialized_start=1015
+  _MENZAMAIL._serialized_end=1071
+  _SUBSCRIBEMAIL._serialized_start=1073
+  _SUBSCRIBEMAIL._serialized_end=1132
+  _CONFIRMATIONMAIL._serialized_start=1134
+  _CONFIRMATIONMAIL._serialized_end=1199
+  _RESPONSE._serialized_start=1201
+  _RESPONSE._serialized_end=1257
+  _DATABASE._serialized_start=1303
+  _DATABASE._serialized_end=1382
+  _MEDIATOR._serialized_start=1385
+  _MEDIATOR._serialized_end=1624
+  _EMAILSERVICE._serialized_start=1627
+  _EMAILSERVICE._serialized_end=1772
 # @@protoc_insertion_point(module_scope)

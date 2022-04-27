@@ -108,9 +108,19 @@ class MediatorStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.NewEmail = channel.unary_unary(
+                '/Mediator/NewEmail',
+                request_serializer=menza__pb2.Email.SerializeToString,
+                response_deserializer=menza__pb2.Response.FromString,
+                )
         self.WriteEmail = channel.unary_unary(
                 '/Mediator/WriteEmail',
                 request_serializer=menza__pb2.Email.SerializeToString,
+                response_deserializer=menza__pb2.Response.FromString,
+                )
+        self.SubscribeEmail = channel.unary_unary(
+                '/Mediator/SubscribeEmail',
+                request_serializer=menza__pb2.SubscribeMail.SerializeToString,
                 response_deserializer=menza__pb2.Response.FromString,
                 )
         self.ReadEmails = channel.unary_unary(
@@ -133,7 +143,19 @@ class MediatorStub(object):
 class MediatorServicer(object):
     """Missing associated documentation comment in .proto file."""
 
+    def NewEmail(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def WriteEmail(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubscribeEmail(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -160,9 +182,19 @@ class MediatorServicer(object):
 
 def add_MediatorServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'NewEmail': grpc.unary_unary_rpc_method_handler(
+                    servicer.NewEmail,
+                    request_deserializer=menza__pb2.Email.FromString,
+                    response_serializer=menza__pb2.Response.SerializeToString,
+            ),
             'WriteEmail': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteEmail,
                     request_deserializer=menza__pb2.Email.FromString,
+                    response_serializer=menza__pb2.Response.SerializeToString,
+            ),
+            'SubscribeEmail': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubscribeEmail,
+                    request_deserializer=menza__pb2.SubscribeMail.FromString,
                     response_serializer=menza__pb2.Response.SerializeToString,
             ),
             'ReadEmails': grpc.unary_unary_rpc_method_handler(
@@ -191,6 +223,23 @@ class Mediator(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
+    def NewEmail(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Mediator/NewEmail',
+            menza__pb2.Email.SerializeToString,
+            menza__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def WriteEmail(request,
             target,
             options=(),
@@ -203,6 +252,23 @@ class Mediator(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Mediator/WriteEmail',
             menza__pb2.Email.SerializeToString,
+            menza__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SubscribeEmail(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Mediator/SubscribeEmail',
+            menza__pb2.SubscribeMail.SerializeToString,
             menza__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -255,5 +321,132 @@ class Mediator(object):
         return grpc.experimental.unary_unary(request, target, '/Mediator/ReadMenza',
             menza__pb2.MenzaQuery.SerializeToString,
             menza__pb2.Menza.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class EmailServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.SendEmail = channel.unary_unary(
+                '/EmailService/SendEmail',
+                request_serializer=menza__pb2.MenzaMail.SerializeToString,
+                response_deserializer=menza__pb2.Response.FromString,
+                )
+        self.SendVerification = channel.unary_unary(
+                '/EmailService/SendVerification',
+                request_serializer=menza__pb2.Email.SerializeToString,
+                response_deserializer=menza__pb2.Response.FromString,
+                )
+        self.SendConfirmation = channel.unary_unary(
+                '/EmailService/SendConfirmation',
+                request_serializer=menza__pb2.ConfirmationMail.SerializeToString,
+                response_deserializer=menza__pb2.Response.FromString,
+                )
+
+
+class EmailServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def SendEmail(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendVerification(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendConfirmation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_EmailServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'SendEmail': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendEmail,
+                    request_deserializer=menza__pb2.MenzaMail.FromString,
+                    response_serializer=menza__pb2.Response.SerializeToString,
+            ),
+            'SendVerification': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendVerification,
+                    request_deserializer=menza__pb2.Email.FromString,
+                    response_serializer=menza__pb2.Response.SerializeToString,
+            ),
+            'SendConfirmation': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendConfirmation,
+                    request_deserializer=menza__pb2.ConfirmationMail.FromString,
+                    response_serializer=menza__pb2.Response.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'EmailService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class EmailService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def SendEmail(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/EmailService/SendEmail',
+            menza__pb2.MenzaMail.SerializeToString,
+            menza__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SendVerification(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/EmailService/SendVerification',
+            menza__pb2.Email.SerializeToString,
+            menza__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SendConfirmation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/EmailService/SendConfirmation',
+            menza__pb2.ConfirmationMail.SerializeToString,
+            menza__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
