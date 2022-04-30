@@ -69,7 +69,10 @@ message DatabaseQuery {
 }
 
 message MenzaQuery {
-    string restaurant_name = 1;
+    oneof identifier {
+        string restaurant_name = 1;
+        int32 restaurant_id = 2;
+    } 
 }
 
 message EmailQuery {
@@ -123,6 +126,7 @@ service Mediator {
     rpc ReadEmails(EmailQuery) returns (QueryResult) {}
     rpc WriteMenza(Menza) returns (Response) {}
     rpc ReadMenza(MenzaQuery) returns (Menza) {}
+    rpc ListRestaurants(MenzaQuery) returns (QueryResult) {}
 }
 
 service EmailService {

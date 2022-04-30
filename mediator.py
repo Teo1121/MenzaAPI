@@ -143,8 +143,9 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
 
     def ReadMenza(self, request : menza_pb2.MenzaQuery, context) -> menza_pb2.Menza:
         stub = menza_pb2_grpc.DatabaseStub(self.sql_server)
+        where = {'name':request.restaurant_name} if request.WhichOneof("identifier") == "restaurant_name" else {'id':str(request.restaurant_id)}
         try:
-            restaurant = stub.Load(menza_pb2.DatabaseQuery(what='*', table='Restaurant', where={'name':request.restaurant_name})).data[0].restaurant
+            restaurant = stub.Load(menza_pb2.DatabaseQuery(what='*', table='Restaurant', where=where)).data[0].restaurant
         except grpc.RpcError as e:
             context.set_code(e.code())
             context.set_details("Database error: "+e.details())
@@ -172,6 +173,14 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
 
         return menza_pb2.Menza(restaurant=restaurant,lunch=lunch,dinner=dinner)
 
+    def ListRestaurants(self, request : menza_pb2.MenzaQuery, context) -> menza_pb2.QueryResult:
+        stub = menza_pb2_grpc.DatabaseStub(self.sql_server)
+        try:
+            return stub.Load(menza_pb2.DatabaseQuery(what='*', table='Restaurant'))
+        except grpc.RpcError as e:
+            context.set_code(e.code())
+            context.set_details("Database error: "+e.details())
+            return menza_pb2.QueryResult()
 
 def main():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

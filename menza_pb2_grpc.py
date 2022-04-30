@@ -138,6 +138,11 @@ class MediatorStub(object):
                 request_serializer=menza__pb2.MenzaQuery.SerializeToString,
                 response_deserializer=menza__pb2.Menza.FromString,
                 )
+        self.ListRestaurants = channel.unary_unary(
+                '/Mediator/ListRestaurants',
+                request_serializer=menza__pb2.MenzaQuery.SerializeToString,
+                response_deserializer=menza__pb2.QueryResult.FromString,
+                )
 
 
 class MediatorServicer(object):
@@ -179,6 +184,12 @@ class MediatorServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ListRestaurants(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MediatorServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -211,6 +222,11 @@ def add_MediatorServicer_to_server(servicer, server):
                     servicer.ReadMenza,
                     request_deserializer=menza__pb2.MenzaQuery.FromString,
                     response_serializer=menza__pb2.Menza.SerializeToString,
+            ),
+            'ListRestaurants': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListRestaurants,
+                    request_deserializer=menza__pb2.MenzaQuery.FromString,
+                    response_serializer=menza__pb2.QueryResult.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -321,6 +337,23 @@ class Mediator(object):
         return grpc.experimental.unary_unary(request, target, '/Mediator/ReadMenza',
             menza__pb2.MenzaQuery.SerializeToString,
             menza__pb2.Menza.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ListRestaurants(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Mediator/ListRestaurants',
+            menza__pb2.MenzaQuery.SerializeToString,
+            menza__pb2.QueryResult.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
