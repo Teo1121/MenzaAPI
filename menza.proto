@@ -99,7 +99,7 @@ message MenzaMail {
 
 message SubscribeMail {
     Email email = 1;
-    repeated string restaurants = 2;  
+    repeated MenzaQuery restaurants = 2;  
 }
 
 message ConfirmationMail {

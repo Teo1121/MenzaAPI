@@ -55,7 +55,7 @@ class Email(menza_pb2_grpc.EmailServiceServicer):
         message['to'] = request.email.address
 
         context.set_code(self.__send_message(message))
-        return menza_pb2.Response(msg="Success")
+        return menza_pb2.Response(msg="Mail sent")
 
     def SendVerification(self, request, context):
 
@@ -66,7 +66,7 @@ class Email(menza_pb2_grpc.EmailServiceServicer):
         message['subject'] = "Verify Email"
 
         context.set_code(self.__send_message(message))
-        return menza_pb2.Response(msg="Success")
+        return menza_pb2.Response(msg="Verification mail sent")
 
     
     def SendConfirmation(self, request, context):
@@ -77,7 +77,7 @@ class Email(menza_pb2_grpc.EmailServiceServicer):
         message['subject'] = "Thank you!"
 
         context.set_code(self.__send_message(message))
-        return menza_pb2.Response(msg="Success")
+        return menza_pb2.Response(msg="Confirmation mail sent")
 
             
 def main():

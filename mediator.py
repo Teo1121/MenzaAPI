@@ -27,11 +27,10 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
             self.emails2verify.pop(request.uuid)
 
             stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
-            response = menza_pb2.Response(msg="Success")
             try:
-                stub.SendConfirmation(menza_pb2.ConfirmationMail(email=new_user, has_subscribed=True))
+                response = stub.SendConfirmation(menza_pb2.ConfirmationMail(email=new_user, has_subscribed=True))
             except grpc.RpcError as e:
-                response.msg = "Confirmation mail not sent"
+                response = menza_pb2.Response(msg="Confirmation mail not sent")
             context.set_code(grpc.StatusCode.OK)
 
         else:
@@ -56,11 +55,10 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
         self.emails2verify[uuid] = request.address
 
         stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
-        response = menza_pb2.Response(msg="Success")
         try:
             response = stub.SendVerification(menza_pb2.Email(uuid=uuid, address=request.address))
         except grpc.RpcError as e:
-            response.msg = "Verification mail not sent"
+            response = menza_pb2.Response(msg="Verification mail not sent")
         context.set_code(grpc.StatusCode.OK)
 
         return response
@@ -77,22 +75,25 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details('Email '+request.email.uuid+' was not found in the database')
             return menza_pb2.Response()
-
-        for name in request.restaurants:
+        
+        for menza_query in request.restaurants:
+            if menza_query.WhichOneof("identifier") == "restaurant_name":
+                where = {"name":menza_query.restaurant_name}
+            else:
+                where = {"id":str(menza_query.restaurant_id)}
             try:
-                id_restaurant = stub.Load(menza_pb2.DatabaseQuery(what='*', table="Restaurant", where={'name':name})).data[0].restaurant.id
+                id_restaurant = stub.Load(menza_pb2.DatabaseQuery(what='*', table="Restaurant", where=where)).data[0].restaurant.id
             except IndexError:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details('Restaurant '+name+' was not found in the database')
+                context.set_details('Restaurant '+''.join(map(str, where.values()))+' was not found in the database')
                 return menza_pb2.Response()
             stub.Save(menza_pb2.Model(subscription=menza_pb2.Subscription(id_email=loaded_email.id, id_restaurant=id_restaurant)))
         
         stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
-        response = menza_pb2.Response(msg="Success")
         try:
-            stub.SendConfirmation(menza_pb2.ConfirmationMail(email=loaded_email, has_subscribed=False))
+            response = stub.SendConfirmation(menza_pb2.ConfirmationMail(email=loaded_email, has_subscribed=True))
         except grpc.RpcError as e:
-            response.msg = "Confirmation mail not sent"
+            response = menza_pb2.Response(msg="Confirmation mail not sent")
         context.set_code(grpc.StatusCode.OK)
 
         return response
