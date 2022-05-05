@@ -14,7 +14,7 @@ def subscribe(args):
 
 class MyClient(discord.Client):
     COMMANDS = {"!list"      : lambda args : requests.get("http://127.0.0.1:8081/menza/list").json(),
-                "!menza"     : lambda args : requests.get("http://127.0.0.1:8081/menza/"+"".join(args)).json(),
+                "!menza"     : lambda args : requests.get("http://127.0.0.1:8081/menza/"+" ".join(args)).json(),
                 "!signup"    : lambda args : requests.post("http://127.0.0.1:8081/email",json={"email":args[0]}).json(),
                 "!subscribe" : subscribe,
                 "!help"      : lambda args : {"message":

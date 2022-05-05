@@ -7,6 +7,8 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.protobuf.json_format import MessageToDict
+import json
 
 from concurrent import futures
 import grpc
@@ -48,8 +50,7 @@ class Email(menza_pb2_grpc.EmailServiceServicer):
             print(f'An error occurred: {error}')
     
     def SendEmail(self, request, context):
-        
-        message = MIMEText("data: "+str(request.data))
+        message = MIMEText("data: "+json.dumps(MessageToDict(request.data), ensure_ascii=False, indent=4))
         message['from'] = "me"
         message['subject'] = "New menu in "+request.data.restaurant.name
         message['to'] = request.email.address
@@ -60,7 +61,7 @@ class Email(menza_pb2_grpc.EmailServiceServicer):
     def SendVerification(self, request, context):
 
         link = "http://127.0.0.1:8081/verify/"+request.uuid
-        message = MIMEText("Your uuid is: uuid\nLink to verify user email :"+link)
+        message = MIMEText("Your uuid is: "+request.uuid+"\nLink to verify user email :"+link)
         message['to'] = request.address
         message['from'] = "me"
         message['subject'] = "Verify Email"

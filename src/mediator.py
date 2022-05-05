@@ -135,7 +135,7 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
                 id_dish = None
                 for loaded in dishes:
                     if similar(dish.name,loaded.name) >= 0.8275862068965517:
-                        print(dish.name,'|',loaded.name,'|',similar(dish.name,loaded.name))
+                        #print(dish.name,'|',loaded.name,'|',similar(dish.name,loaded.name))
                         id_dish = loaded.id
                         break
                 if id_dish == None:
@@ -153,8 +153,16 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
                 id_dish = stub.Save(menza_pb2.Model(dish=dish)).model_id
                 stub.Save(menza_pb2.Model(dish_offer=menza_pb2.DishOffer(id_dish=id_dish, id_offer=id_offer)))
         
+        email_models = stub.Load(menza_pb2.DatabaseQuery(what='address',table='Email')).data
+        stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
+        try:
+            for model in email_models:
+                response = stub.SendEmail(menza_pb2.MenzaMail(email=model.email,data=request))
+        except grpc.RpcError as e:
+            response = menza_pb2.Response(msg="Mail not sent")
+
         context.set_code(grpc.StatusCode.OK)
-        return menza_pb2.Response(msg="Success")
+        return response
 
     def ReadMenza(self, request : menza_pb2.MenzaQuery, context) -> menza_pb2.Menza:
         stub = menza_pb2_grpc.DatabaseStub(self.sql_server)
