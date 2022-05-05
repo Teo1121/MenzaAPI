@@ -60,7 +60,7 @@ class Email(menza_pb2_grpc.EmailServiceServicer):
     def SendVerification(self, request, context):
 
         link = "http://127.0.0.1:8081/verify/"+request.uuid
-        message = MIMEText("link :"+link)
+        message = MIMEText("Your uuid is: uuid\nLink to verify user email :"+link)
         message['to'] = request.address
         message['from'] = "me"
         message['subject'] = "Verify Email"

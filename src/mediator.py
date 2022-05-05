@@ -4,6 +4,11 @@ import grpc
 import menza_pb2
 import menza_pb2_grpc
 from uuid import uuid1
+from difflib import SequenceMatcher
+
+def similar(a, b):
+    """Used to check for differences in words caused by grammatical mistakes, plurals and similar letter mismatches"""
+    return SequenceMatcher(None, a, b).ratio()
 
 class Mediator(menza_pb2_grpc.MediatorServicer):
     def __init__(self):
@@ -119,6 +124,7 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
             return menza_pb2.Response()
 
         ts = datetime.now().replace(microsecond=0,second=0).isoformat()
+        dishes = [model.dish for model in stub.Load(menza_pb2.DatabaseQuery(what='*', table="Dish")).data]
         for data in request.lunch:
             menu = data.menu
             menu.meal = menza_pb2.Meal.LUNCH
@@ -126,7 +132,15 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
             id_menu = stub.Save(menza_pb2.Model(menu=menu)).model_id
             id_offer = stub.Save(menza_pb2.Model(offer=menza_pb2.Offer(id_restaurant=id_restaurant,id_menu=id_menu,date=ts))).model_id
             for dish in data.dishes:
-                id_dish = stub.Save(menza_pb2.Model(dish=dish)).model_id
+                id_dish = None
+                for loaded in dishes:
+                    if similar(dish.name,loaded.name) >= 0.8275862068965517:
+                        print(dish.name,'|',loaded.name,'|',similar(dish.name,loaded.name))
+                        id_dish = loaded.id
+                        break
+                if id_dish == None:
+                    id_dish = stub.Save(menza_pb2.Model(dish=dish)).model_id
+                    dishes.insert(0,menza_pb2.Dish(id=id_dish,name=dish.name))
                 stub.Save(menza_pb2.Model(dish_offer=menza_pb2.DishOffer(id_dish=id_dish, id_offer=id_offer)))
         
         for data in request.dinner:
