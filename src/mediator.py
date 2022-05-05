@@ -123,6 +123,11 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
             context.set_details("Database error: "+e.details())
             return menza_pb2.Response()
 
+        loaded_menza = self.ReadMenza(menza_pb2.MenzaQuery(restaurant_id=id_restaurant),context)
+        print(loaded_menza == request,'\n\n',loaded_menza,'\n\n',request)
+        if loaded_menza == request:
+            return menza_pb2.Response(msg="No new data provided")
+
         ts = datetime.now().replace(microsecond=0,second=0).isoformat()
         dishes = [model.dish for model in stub.Load(menza_pb2.DatabaseQuery(what='*', table="Dish")).data]
         for data in request.lunch:
@@ -155,6 +160,7 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
         
         email_models = stub.Load(menza_pb2.DatabaseQuery(what='address',table='Email')).data
         stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
+        response = menza_pb2.Response(msg="No mails to send")
         try:
             for model in email_models:
                 response = stub.SendEmail(menza_pb2.MenzaMail(email=model.email,data=request))
@@ -186,14 +192,15 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
         dinner = []
 
         for model in offers:
-            menu = stub.Load(menza_pb2.DatabaseQuery(what='*', table='Menu', where={'id':str(model.offer.id_menu)})).data[0].menu
+            menu = stub.Load(menza_pb2.DatabaseQuery(what='name,meal', table='Menu', where={'id':str(model.offer.id_menu)})).data[0].menu
             dish_offers = [model.dish_offer for model in stub.Load(menza_pb2.DatabaseQuery(what='*', table='DishOffer', where={'id_offer':str(model.offer.id)})).data]
-            dishes = [stub.Load(menza_pb2.DatabaseQuery(what='*', table='Dish', where={'id':str(dish_offer.id_dish)})).data[0].dish for dish_offer in dish_offers]
+            dishes = [stub.Load(menza_pb2.DatabaseQuery(what='name', table='Dish', where={'id':str(dish_offer.id_dish)})).data[0].dish for dish_offer in dish_offers]
             if menu.meal == menza_pb2.Meal.LUNCH:
                 lunch.append(menza_pb2.Menza.MenuArray(menu=menu,dishes=dishes))
             elif menu.meal == menza_pb2.Meal.DINNER:
                 dinner.append(menza_pb2.Menza.MenuArray(menu=menu,dishes=dishes))
 
+        restaurant.id = 0
         return menza_pb2.Menza(restaurant=restaurant,lunch=lunch,dinner=dinner)
 
     def ListRestaurants(self, request : menza_pb2.MenzaQuery, context) -> menza_pb2.QueryResult:

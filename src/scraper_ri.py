@@ -48,7 +48,7 @@ class Scraper:
         result = {"restaurant":{"name":Scraper.MENZE[self.index]},"lunch":[],"dinner":[]}
         for key in self.daily_menu:
             for menu in self.daily_menu[key]:
-                result[Scraper.RI_MAP[key]].append({'menu':{'name':menu},"dishes":[]})
+                result[Scraper.RI_MAP[key]].append({'menu':{'name':menu,"meal":Scraper.RI_MAP[key].upper()},"dishes":[]})
                 for meal in self.daily_menu[key][menu]:
                     result[Scraper.RI_MAP[key]][-1]['dishes'].append({'name':meal})
 
@@ -94,7 +94,7 @@ def main():
         scraper.scrap()
         scraper.parse()
         try:
-            scraper.update()
+            print(scraper.update())
         except grpc.RpcError as e:
             error_code = e.code()
             if error_code == grpc.StatusCode.UNAVAILABLE:

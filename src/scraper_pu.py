@@ -40,7 +40,7 @@ class Scraper:
             for menu in Scraper.MENUES:
                 if not menu in self.daily_menu[time_of_day]:
                     continue
-                result[time_of_day].append({"menu":{"name":menu}, "dishes":[]})
+                result[time_of_day].append({"menu":{"name":menu,"meal":time_of_day.upper()}, "dishes":[]})
                 for s in self.daily_menu[time_of_day][last:self.daily_menu[time_of_day].index(menu)]:
                     if s.find("sadr") == -1:
                         result[time_of_day][-1]["dishes"].append({"name":s}) 
@@ -58,7 +58,7 @@ def main():
         scraper.scrap()
         scraper.parse()   
         try:
-            scraper.update()
+            print(scraper.update())
         except grpc.RpcError as e:
             error_code = e.code()
             if error_code == grpc.StatusCode.UNAVAILABLE:
