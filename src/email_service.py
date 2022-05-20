@@ -23,6 +23,7 @@ class Email(menza_pb2_grpc.EmailServiceServicer):
         body = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')}
         message = (self.service.users().messages().send(userId='me', body=body)
                    .execute())
+        print("email sent")
         return grpc.StatusCode.OK
       except HttpError as error:
         print('An error occurred: %s' % error)
@@ -86,6 +87,7 @@ def main():
     menza_pb2_grpc.add_EmailServiceServicer_to_server(Email(),server)
     server.add_insecure_port('[::]:50053')
     server.start()
+    print("email service started")
     server.wait_for_termination()
 
 if __name__ == "__main__": 

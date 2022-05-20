@@ -166,6 +166,7 @@ def main():
     menza_pb2_grpc.add_DatabaseServicer_to_server(Database(),server)
     server.add_insecure_port('[::]:50052')
     server.start()
+    print("database started")
     server.wait_for_termination()
 
 if __name__ == "__main__": 

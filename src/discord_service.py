@@ -31,8 +31,6 @@ class MyClient(discord.Client):
         if message.author == self.user:
             return
 
-        print('Message from {0.author}: {0.content}'.format(message))
-
         command = message.content.split(' ')
 
         if command[0] in MyClient.COMMANDS:

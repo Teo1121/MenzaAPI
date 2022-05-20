@@ -124,7 +124,6 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
             return menza_pb2.Response()
 
         loaded_menza = self.ReadMenza(menza_pb2.MenzaQuery(restaurant_id=id_restaurant),context)
-        print(loaded_menza == request,'\n\n',loaded_menza,'\n\n',request)
         if loaded_menza == request:
             return menza_pb2.Response(msg="No new data provided")
 
@@ -158,12 +157,13 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
                 id_dish = stub.Save(menza_pb2.Model(dish=dish)).model_id
                 stub.Save(menza_pb2.Model(dish_offer=menza_pb2.DishOffer(id_dish=id_dish, id_offer=id_offer)))
         
-        email_models = stub.Load(menza_pb2.DatabaseQuery(what='address',table='Email')).data
+        subscribe_models = stub.Load(menza_pb2.DatabaseQuery(what='id_email',table='Subscription',where={'id_restaurant':str(id_restaurant)})).data
         stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
         response = menza_pb2.Response(msg="No mails to send")
         try:
-            for model in email_models:
-                response = stub.SendEmail(menza_pb2.MenzaMail(email=model.email,data=request))
+            for model in subscribe_models:
+                user_email = stub.Load(menza_pb2.DatabaseQuery(what='address',table='Email',where={"id":str(model.subscription.id_email)})).data.email
+                response = stub.SendEmail(menza_pb2.MenzaMail(email=user_email,data=request))
         except grpc.RpcError as e:
             response = menza_pb2.Response(msg="Mail not sent")
 
@@ -217,6 +217,7 @@ def main():
     menza_pb2_grpc.add_MediatorServicer_to_server(Mediator(),server)
     server.add_insecure_port('[::]:50051')
     server.start()
+    print("mediator started")
     server.wait_for_termination()
 
 if __name__ == "__main__": 
