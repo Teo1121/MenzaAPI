@@ -8,6 +8,10 @@ from difflib import SequenceMatcher
 import menza_pb2_grpc
 import menza_pb2
 
+def similar(a, b):
+    """Used to check for differences in words caused by grammatical mistakes, plurals and similar letter mismatches"""
+    return SequenceMatcher(None, a, b).ratio()
+
 class Scraper:
     URL = "https://app.scri.hr/dnevnimeni/"
     MENZE = {'41':"RESTORAN INDEX",
@@ -46,10 +50,20 @@ class Scraper:
 
     def parse(self):
         result = {"restaurant":{"name":Scraper.MENZE[self.index]},"lunch":[],"dinner":[]}
+        stub = menza_pb2_grpc.MediatorStub(self.api)
+        try:
+            dishes = set([model.dish.name for model in stub.ListDishes(menza_pb2.MenzaQuery()).data])
+        except grpc.RpcError as e:
+            dishes = set()
         for key in self.daily_menu:
             for menu in self.daily_menu[key]:
                 result[Scraper.RI_MAP[key]].append({'menu':{'name':menu,"meal":Scraper.RI_MAP[key].upper()},"dishes":[]})
                 for meal in self.daily_menu[key][menu]:
+                    for dish in dishes:
+                        if similar(dish,meal) >= 0.8275862068965517:
+                            meal = dish
+                            break
+                    dishes.add(meal)
                     result[Scraper.RI_MAP[key]][-1]['dishes'].append({'name':meal})
 
         self.parsed_menu = result

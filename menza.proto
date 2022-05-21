@@ -127,6 +127,7 @@ service Mediator {
     rpc WriteMenza(Menza) returns (Response) {}
     rpc ReadMenza(MenzaQuery) returns (Menza) {}
     rpc ListRestaurants(MenzaQuery) returns (QueryResult) {}
+    rpc ListDishes(MenzaQuery) returns (QueryResult) {}
 }
 
 service EmailService {
