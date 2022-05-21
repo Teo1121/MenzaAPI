@@ -149,12 +149,12 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
                 stub.Save(menza_pb2.Model(dish_offer=menza_pb2.DishOffer(id_dish=id_dish, id_offer=id_offer)))
         
         subscribe_models = stub.Load(menza_pb2.DatabaseQuery(what='id_email',table='Subscription',where={'id_restaurant':str(id_restaurant)})).data
-        stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
+        email_stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
         response = menza_pb2.Response(msg="No mails to send")
         try:
             for model in subscribe_models:
-                user_email = stub.Load(menza_pb2.DatabaseQuery(what='address',table='Email',where={"id":str(model.subscription.id_email)})).data.email
-                response = stub.SendEmail(menza_pb2.MenzaMail(email=user_email,data=request))
+                user_email = stub.Load(menza_pb2.DatabaseQuery(what='*',table='Email',where={"id":str(model.subscription.id_email)})).data[0].email           
+                response = email_stub.SendEmail(menza_pb2.MenzaMail(email=user_email,data=request))
         except grpc.RpcError as e:
             response = menza_pb2.Response(msg="Mail not sent")
 
