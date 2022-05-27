@@ -66,6 +66,7 @@ message DatabaseQuery {
     string what = 1;
     string table = 2;
     map<string,string> where = 3;
+    string group = 4;
 }
 
 message MenzaQuery {
@@ -79,7 +80,11 @@ message EmailQuery {
 }
 
 message QueryResult {
+    message AggregationMap {
+        map<string,string> data = 1;
+    }
     repeated Model data = 1;
+    repeated AggregationMap aggregation_data = 2;
 }
 
 message Menza {
@@ -128,6 +133,7 @@ service Mediator {
     rpc ReadMenza(MenzaQuery) returns (Menza) {}
     rpc ListRestaurants(MenzaQuery) returns (QueryResult) {}
     rpc ListDishes(MenzaQuery) returns (QueryResult) {}
+    rpc ListDishesInDetail(MenzaQuery) returns (QueryResult) {}
 }
 
 service EmailService {

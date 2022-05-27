@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS
 
 import grpc
 from werkzeug.exceptions import InternalServerError, BadRequest
@@ -10,6 +11,8 @@ def create_app():
     # create and configure the app
     app = Flask(__name__)
     app.config['JSON_AS_ASCII'] = False
+
+    CORS(app, resources={r"*":{"origins":"*"}})
 
     api = grpc.insecure_channel('localhost:50051')
     stub = menza_pb2_grpc.MediatorStub(api)
@@ -23,6 +26,22 @@ def create_app():
         try:
             return {"code":200, "data":[MessageToDict(model.restaurant) for model in stub.ListRestaurants(menza_pb2.MenzaQuery()).data]}
         except grpc.RpcError as e:
+            raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
+
+    @app.route('/dish/list/<restaurant_id>')
+    def get_detaled_dish_list_for_restaurant(restaurant_id):
+        try:
+            return {"code":200, "data":[MessageToDict(dic)['data'] for dic in stub.ListDishesInDetail(menza_pb2.MenzaQuery(restaurant_id=int(restaurant_id))).aggregation_data]}
+        except grpc.RpcError as e:
+            print(e)
+            raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
+
+    @app.route('/dish/list')
+    def get_detaled_dish_list():
+        try:
+            return {"code":200, "data":[MessageToDict(dic)['data'] for dic in stub.ListDishesInDetail(menza_pb2.MenzaQuery()).aggregation_data]}
+        except grpc.RpcError as e:
+            print(e)
             raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
 
     @app.route('/menza/<identifier>')

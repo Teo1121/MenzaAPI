@@ -132,17 +132,32 @@ class Database(menza_pb2_grpc.DatabaseServicer):
     def Load(self, request : menza_pb2.DatabaseQuery, context) -> menza_pb2.QueryResult:
         where = dict(request.where)
         cursor = self.conn.cursor()
-        query = "SELECT {} FROM {} WHERE {}".format(
+        query = "SELECT {} FROM {} WHERE {} {}".format(
             request.what,
             request.table,
-            ' AND '.join([key+"='"+where[key]+"'" for key in where]) if len(where) > 0 else '1'
+            ' AND '.join([key+"='"+where[key]+"'" for key in where]) if len(where) > 0 else '1',
+            'GROUP BY '+request.group if request.group else ''
         )
 
         try:
             cursor.execute(query)
-        except sqlite3.OperationalError:
+        except sqlite3.OperationalError as e:
+            context.set_details(str(e))
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             return menza_pb2.QueryResult()
+
+        if request.group:
+            data = []
+            keys = [key.lower().split('as')[-1] for key in request.what.replace(' ','').split(',')]
+            for item in cursor.fetchall():
+                data.append({'data':{}})
+                for i, key in enumerate(keys):
+                    data[-1]['data'][key] = str(item[i])
+            
+            response = menza_pb2.QueryResult(**{"aggregation_data":data})
+            context.set_code(grpc.StatusCode.OK)
+            return response
+
         model = getattr(menza_pb2,request.table.split(' ')[0])
 
         res = []

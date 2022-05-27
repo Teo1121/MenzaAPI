@@ -148,6 +148,11 @@ class MediatorStub(object):
                 request_serializer=menza__pb2.MenzaQuery.SerializeToString,
                 response_deserializer=menza__pb2.QueryResult.FromString,
                 )
+        self.ListDishesInDetail = channel.unary_unary(
+                '/Mediator/ListDishesInDetail',
+                request_serializer=menza__pb2.MenzaQuery.SerializeToString,
+                response_deserializer=menza__pb2.QueryResult.FromString,
+                )
 
 
 class MediatorServicer(object):
@@ -201,6 +206,12 @@ class MediatorServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ListDishesInDetail(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MediatorServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -241,6 +252,11 @@ def add_MediatorServicer_to_server(servicer, server):
             ),
             'ListDishes': grpc.unary_unary_rpc_method_handler(
                     servicer.ListDishes,
+                    request_deserializer=menza__pb2.MenzaQuery.FromString,
+                    response_serializer=menza__pb2.QueryResult.SerializeToString,
+            ),
+            'ListDishesInDetail': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListDishesInDetail,
                     request_deserializer=menza__pb2.MenzaQuery.FromString,
                     response_serializer=menza__pb2.QueryResult.SerializeToString,
             ),
@@ -385,6 +401,23 @@ class Mediator(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Mediator/ListDishes',
+            menza__pb2.MenzaQuery.SerializeToString,
+            menza__pb2.QueryResult.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ListDishesInDetail(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Mediator/ListDishesInDetail',
             menza__pb2.MenzaQuery.SerializeToString,
             menza__pb2.QueryResult.FromString,
             options, channel_credentials,
