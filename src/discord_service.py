@@ -4,24 +4,24 @@ import json
 import os
 
 def subscribe(args):
-    restaurants = list(map(lambda x : x.strip(),' '.join(args[1:]).split(',')))
+    restaurants = list(map(lambda x : x.strip(),' '.join(args[2:]).split(',')))
     try:
         restaurants = list(map(int,restaurants))
         key = "ids"
     except ValueError:
         key = "names"
-    return requests.post("http://127.0.0.1:8081/email/sub",json={"uuid":args[0], key : restaurants}).json()
+    return requests.post("http://127.0.0.1:8081/email/sub",json={"uuid":args[0], key : restaurants, 'sub':bool(args[1])}).json()
 
 class MyClient(discord.Client):
     COMMANDS = {"!list"      : lambda args : requests.get("http://127.0.0.1:8081/menza/list").json(),
                 "!menza"     : lambda args : requests.get("http://127.0.0.1:8081/menza/"+" ".join(args)).json(),
                 "!signup"    : lambda args : requests.post("http://127.0.0.1:8081/email",json={"email":args[0]}).json(),
-                "!subscribe" : subscribe,
+                "!sub" : subscribe,
                 "!help"      : lambda args : {"message":
 """!list - list available restaurants
 !menza <restaurant_identifier> - check out today's menu!
 !signup <email> - signup to the email subscription
-!subscribe <uuid> <restaurant_identifiers> - subscribe to a restaurant
+!sub <uuid> <unsubscribe> <restaurant_identifiers> - subscribe or unsubscribe to a restaurant
 """}}
 
     async def on_ready(self):

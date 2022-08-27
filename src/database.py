@@ -13,6 +13,8 @@ class Database(menza_pb2_grpc.DatabaseServicer):
     def __init__(self,testing=True) -> None:
         super().__init__()
 
+        self.is_delete = False
+
         if testing:
             self.conn = sqlite3.connect(':memory:',check_same_thread=False)
 
@@ -110,11 +112,21 @@ class Database(menza_pb2_grpc.DatabaseServicer):
                                     use_integers_for_enums=True)[model_type]
 
         model.pop('id')
+
+        cursor = self.conn.cursor()
+
+        if self.is_delete:
+            query = "DELETE FROM {} WHERE {}".format(''.join(word.title() for word in model_type.split('_')),' = ? AND '.join(model.keys())+' = ?')
+            cursor.execute(query,tuple(model.values()))
+            self.conn.commit()
+        
+            context.set_code(grpc.StatusCode.OK)
+            return menza_pb2.Response(model_id=cursor.lastrowid)
+
         query = "SELECT * FROM {} WHERE {}".format(
                                                 ''.join(word.title() for word in model_type.split('_')),
                                                 ' AND '.join([key+"='"+str(model[key])+"'" for key in model])
                                                 )
-        cursor = self.conn.cursor()
 
         cursor.execute(query)
         duplicate = cursor.fetchall()
@@ -128,6 +140,12 @@ class Database(menza_pb2_grpc.DatabaseServicer):
         
         context.set_code(grpc.StatusCode.OK)
         return menza_pb2.Response(model_id=cursor.lastrowid)
+
+    def Delete(self, request : menza_pb2.Model, context) -> menza_pb2.Response:
+        self.is_delete = True
+        response = self.Save(request,context)
+        self.is_delete = False
+        return response
 
     def Load(self, request : menza_pb2.DatabaseQuery, context) -> menza_pb2.QueryResult:
         where = dict(request.where)

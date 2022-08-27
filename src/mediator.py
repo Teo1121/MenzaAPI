@@ -31,11 +31,7 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
 
             self.emails2verify.pop(request.uuid)
 
-            stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
-            try:
-                response = stub.SendConfirmation(menza_pb2.ConfirmationMail(email=new_user, has_subscribed=True))
-            except grpc.RpcError as e:
-                response = menza_pb2.Response(msg="Confirmation mail not sent")
+            response = menza_pb2.Response(msg="Mail Confirmation successful!")
             context.set_code(grpc.StatusCode.OK)
 
         else:
@@ -92,11 +88,14 @@ class Mediator(menza_pb2_grpc.MediatorServicer):
                 context.set_code(grpc.StatusCode.NOT_FOUND)
                 context.set_details('Restaurant '+''.join(map(str, where.values()))+' was not found in the database')
                 return menza_pb2.Response()
-            stub.Save(menza_pb2.Model(subscription=menza_pb2.Subscription(id_email=loaded_email.id, id_restaurant=id_restaurant)))
+            if request.is_subbed:
+                stub.Delete(menza_pb2.Model(subscription=menza_pb2.Subscription(id_email=loaded_email.id, id_restaurant=id_restaurant)))
+            else:
+                stub.Save(menza_pb2.Model(subscription=menza_pb2.Subscription(id_email=loaded_email.id, id_restaurant=id_restaurant)))
         
         stub = menza_pb2_grpc.EmailServiceStub(self.email_server)
         try:
-            response = stub.SendConfirmation(menza_pb2.ConfirmationMail(email=loaded_email, has_subscribed=True))
+            response = stub.SendConfirmation(menza_pb2.ConfirmationMail(email=loaded_email, has_subscribed=not request.is_subbed))
         except grpc.RpcError as e:
             response = menza_pb2.Response(msg="Confirmation mail not sent")
         context.set_code(grpc.StatusCode.OK)

@@ -8,6 +8,9 @@ from difflib import SequenceMatcher
 import menza_pb2_grpc
 import menza_pb2
 
+import pickle
+from datetime import datetime
+
 def similar(a, b):
     """Used to check for differences in words caused by grammatical mistakes, plurals and similar letter mismatches"""
     return SequenceMatcher(None, a, b).ratio()
@@ -101,12 +104,28 @@ class Scraper:
     def update(self):
         stub = menza_pb2_grpc.MediatorStub(self.api)
         return stub.WriteMenza(menza_pb2.Menza(**self.parsed_menu))
-        
+
+    def save_to_file(self,file : str):
+        ts = datetime.now().replace(microsecond=0,second=0).isoformat()
+        new = []
+        try:
+            r_file = open(file,'rb')
+            new = pickle.load(r_file)
+            r_file.close()
+        except FileNotFoundError:
+            pass
+        self.parsed_menu["date"] = ts
+        new.append(self.parsed_menu)
+        w_file = open(file,'wb')
+        pickle.dump(new,w_file)
+        w_file.close()
+
 def main():
     scraper = Scraper(41)
     while True:
         scraper.scrap()
         scraper.parse()
+        #scraper.save_to_file("rika.dat") 
         try:
             print(scraper.update())
         except grpc.RpcError as e:

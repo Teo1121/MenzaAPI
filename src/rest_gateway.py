@@ -17,9 +17,9 @@ def create_app():
     api = grpc.insecure_channel('localhost:50051')
     stub = menza_pb2_grpc.MediatorStub(api)
 
-    @app.route('/hello')
-    def hello():
-        return {"message":"Hello world!"}
+    @app.route('/echo')
+    def echo():
+        return {"message":"I'm alive and well!"}
     
     @app.route('/menza/list')
     def get_menza_list():
@@ -83,7 +83,11 @@ def create_app():
         else:
             raise BadRequest("Bad request: no resturant identifier found in request body")
         try:
-            response = stub.SubscribeEmail(menza_pb2.SubscribeMail(email=menza_pb2.Email(uuid=data["uuid"]), restaurants=restaurants))
+            is_subbed = data["sub"]
+        except KeyError as e:
+            is_subbed = False
+        try:
+            response = stub.SubscribeEmail(menza_pb2.SubscribeMail(email=menza_pb2.Email(uuid=data["uuid"]), restaurants=restaurants, is_subbed=is_subbed))
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 raise BadRequest("Bad request: "+e.details())

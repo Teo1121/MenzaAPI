@@ -105,6 +105,7 @@ message MenzaMail {
 message SubscribeMail {
     Email email = 1;
     repeated MenzaQuery restaurants = 2;  
+    bool is_subbed = 3;
 }
 
 message ConfirmationMail {
@@ -121,6 +122,7 @@ message Response {
 
 service Database {
     rpc Save(Model) returns (Response) {}
+    rpc Delete(Model) returns (Response) {}
     rpc Load(DatabaseQuery) returns (QueryResult) {}
 }
 

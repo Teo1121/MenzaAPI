@@ -19,6 +19,11 @@ class DatabaseStub(object):
                 request_serializer=menza__pb2.Model.SerializeToString,
                 response_deserializer=menza__pb2.Response.FromString,
                 )
+        self.Delete = channel.unary_unary(
+                '/Database/Delete',
+                request_serializer=menza__pb2.Model.SerializeToString,
+                response_deserializer=menza__pb2.Response.FromString,
+                )
         self.Load = channel.unary_unary(
                 '/Database/Load',
                 request_serializer=menza__pb2.DatabaseQuery.SerializeToString,
@@ -35,6 +40,12 @@ class DatabaseServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Delete(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def Load(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -46,6 +57,11 @@ def add_DatabaseServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Save': grpc.unary_unary_rpc_method_handler(
                     servicer.Save,
+                    request_deserializer=menza__pb2.Model.FromString,
+                    response_serializer=menza__pb2.Response.SerializeToString,
+            ),
+            'Delete': grpc.unary_unary_rpc_method_handler(
+                    servicer.Delete,
                     request_deserializer=menza__pb2.Model.FromString,
                     response_serializer=menza__pb2.Response.SerializeToString,
             ),
@@ -76,6 +92,23 @@ class Database(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Database/Save',
+            menza__pb2.Model.SerializeToString,
+            menza__pb2.Response.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Delete(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Database/Delete',
             menza__pb2.Model.SerializeToString,
             menza__pb2.Response.FromString,
             options, channel_credentials,
