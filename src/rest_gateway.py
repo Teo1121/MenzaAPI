@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS
 
 import grpc
-from werkzeug.exceptions import InternalServerError, BadRequest
+from werkzeug.exceptions import InternalServerError, BadRequest, ServiceUnavailable
 import menza_pb2
 import menza_pb2_grpc
 from google.protobuf.json_format import MessageToDict
@@ -26,6 +26,8 @@ def create_app():
         try:
             return {"code":200, "data":[MessageToDict(model.restaurant) for model in stub.ListRestaurants(menza_pb2.MenzaQuery()).data]}
         except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                raise ServiceUnavailable(e.details())
             raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
 
     @app.route('/dish/list/<restaurant_id>')
@@ -33,7 +35,8 @@ def create_app():
         try:
             return {"code":200, "data":[MessageToDict(dic)['data'] for dic in stub.ListDishesInDetail(menza_pb2.MenzaQuery(restaurant_id=int(restaurant_id))).aggregation_data]}
         except grpc.RpcError as e:
-            print(e)
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                raise ServiceUnavailable(e.details())
             raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
 
     @app.route('/dish/list')
@@ -41,7 +44,8 @@ def create_app():
         try:
             return {"code":200, "data":[MessageToDict(dic)['data'] for dic in stub.ListDishesInDetail(menza_pb2.MenzaQuery()).aggregation_data]}
         except grpc.RpcError as e:
-            print(e)
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                raise ServiceUnavailable(e.details())
             raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
 
     @app.route('/menza/<identifier>')
@@ -55,6 +59,8 @@ def create_app():
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 raise BadRequest("Bad request: "+e.details())
+            elif e.code() == grpc.StatusCode.UNAVAILABLE:
+                raise ServiceUnavailable(e.details())
             else:
                 raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
   
@@ -66,6 +72,8 @@ def create_app():
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.ALREADY_EXISTS:
                 raise BadRequest("Bad request: "+e.details())
+            elif e.code() == grpc.StatusCode.UNAVAILABLE:
+                raise ServiceUnavailable(e.details())
             else:
                 raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
         except KeyError as e:
@@ -91,6 +99,8 @@ def create_app():
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 raise BadRequest("Bad request: "+e.details())
+            elif e.code() == grpc.StatusCode.UNAVAILABLE:
+                raise ServiceUnavailable(e.details())
             else:
                 raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
         except KeyError as e:
@@ -105,6 +115,8 @@ def create_app():
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 raise BadRequest("Bad request: "+e.details())
+            elif e.code() == grpc.StatusCode.UNAVAILABLE:
+                raise ServiceUnavailable(e.details())
             else:
                 raise InternalServerError(e.details() + " " + str(e.code()), original_exception=e)
 
@@ -126,6 +138,10 @@ def create_app():
     @app.errorhandler(500)
     def server_error(error):
         return ({"code":500, "message":error.description },500)
+
+    @app.errorhandler(503)
+    def server_error(error):
+        return ({"code":503, "message":error.description },500)
 
     return app
 
