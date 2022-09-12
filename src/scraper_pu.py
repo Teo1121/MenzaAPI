@@ -62,7 +62,7 @@ def main():
         except grpc.RpcError as e:
             error_code = e.code()
             if error_code == grpc.StatusCode.UNAVAILABLE:
-                print("mediator service is offline")
+                print("service offline: ", e.details())
             else:
                 print("unknown error occured: ",e)
            

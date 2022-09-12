@@ -196,7 +196,7 @@ class Database(menza_pb2_grpc.DatabaseServicer):
 
 def main():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    menza_pb2_grpc.add_DatabaseServicer_to_server(Database(),server)
+    menza_pb2_grpc.add_DatabaseServicer_to_server(Database(testing=True),server)
     server.add_insecure_port('[::]:50052')
     server.start()
     print("database started")

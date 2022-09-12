@@ -2,6 +2,7 @@ from time import sleep
 import grpc
 import requests   
 from bs4 import *
+import re
 
 import menza_pb2_grpc
 import menza_pb2
@@ -17,11 +18,15 @@ class Scraper:
         html = requests.get(Scraper.URL).text
 
         # get the data  
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, 'lxml')
 
         for tag in soup.find("div",{"class":"entry-content clearfix"}).find_all("div"):
-            if len(tag) > 1:
-                self.menu['lunch'].append({"menu":{"name":tag.find("h3").text,"meal":"LUNCH"},"dishes":[dict([["name",name]]) for name in tag.find("p").text.split("\n") if name != '']})
+            menu_name = tag.find(text=re.compile("Menu"))
+            if menu_name == None:
+                menu_name = tag.find(text=re.compile("Jela"))
+            tag = menu_name.parent
+            self.menu['lunch'].append({"menu":{"name":str(menu_name),"meal":"LUNCH"},"dishes":[dict([["name",name]]) for name in tag.get_text(separator=',').split(",")[1:]]})
+    
     def update(self):
         stub = menza_pb2_grpc.MediatorStub(self.api)
         return stub.WriteMenza(menza_pb2.Menza(**self.menu))
@@ -35,7 +40,7 @@ def main():
         except grpc.RpcError as e:
             error_code = e.code()
             if error_code == grpc.StatusCode.UNAVAILABLE:
-                print("mediator service is offline")
+                print("service offline: ", e.details())
             else:
                 print("unknown error occured: ",e)
            
